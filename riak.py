@@ -37,7 +37,7 @@ class RiakPlugin(PorkchopPlugin):
     except:
       stats_url = "http://localhost:8098/stats"
 
-    stats = json.loads(urllib2.urlopen(stats_url)).read()
+    stats = json.loads(urllib2.urlopen(stats_url).read())
 
     for key in num_keys:
       output[key] = stats[key]
