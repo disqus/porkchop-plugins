@@ -16,30 +16,29 @@ class RedisPlugin(PorkchopPlugin):
     data = {}
 
     try:
-      instances = self.config['redis']['instances'].split(',').strip()
+      instance_config = self.config['redis']['instances']
     except:
-      instances = ['localhost:6379']
+      instance_config = 'localhost:6379'
 
-    for inst in instances:
+    instances = [s.strip().split(':') for s in instance_config.split(',')]
+
+    for host, port in instances:
       try:
-        host, port = inst.split(':')
         sock = self._connect(host, int(port))
 
-        sock.send('info\r\n')
+        sock.send('info\r\nquit\r\n')
 
         # first line is the response length in bytes
         resp_hdr = ''
         sock.recv(1)
-        while True:
+        while not resp_hdr.endswith('\r\n'):
           resp_hdr += sock.recv(1)
-          if '\r\n' in resp_hdr: break
 
         resp_len = int(resp_hdr.strip())
 
         resp_data = sock.recv(resp_len)
-        sock.send('quit\r\n')
         sock.close()
-      except socket.error:
+      except (socket.error, ValueError):
         continue
 
       for line in resp_data.splitlines():
