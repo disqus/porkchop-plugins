@@ -25,8 +25,7 @@ class RedisPlugin(PorkchopPlugin):
     for host, port in instances:
       try:
         sock = self._connect(host, int(port))
-
-        sock.send('info\r\nquit\r\n')
+        sock.send('info\r\n')
 
         # first line is the response length in bytes
         resp_hdr = ''
@@ -37,6 +36,7 @@ class RedisPlugin(PorkchopPlugin):
         resp_len = int(resp_hdr.strip())
 
         resp_data = sock.recv(resp_len)
+        sock.send('quit\r\n')
         sock.close()
       except (socket.error, ValueError):
         continue
