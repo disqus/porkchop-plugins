@@ -3,10 +3,10 @@ import time
 
 from porkchop.plugin import PorkchopPlugin
 
-def jiffyize(val1, val2):
+def sub(a, b, inter):
   jiffy = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
 
-  return (float(val2) - float(val1)) * 100 / jiffy
+  return (float(b) - float(a)) / inter * 100 / jiffy
 
 def read_info():
   data = {}
@@ -39,16 +39,23 @@ class CpuPlugin(PorkchopPlugin):
 
     hz = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
 
-    cpu_first = read_info()
-    time.sleep(1)
-    cpu_second = read_info()
+    if not self.__class__._cache or self.__class__._lastrefresh:
+      prev = read_info()
+      delta = 1
+      time.sleep(delta)
+    else:
+      prev = self.__class__._cache
+      delta = time.time() - self.__class__._lastrefresh
 
-    for key in cpu_second.keys():
+    cur = read_info()
+    self.__class__._cache = cur
+
+    for key in cur.keys():
       data.setdefault(key, {})
       for pos in xrange(len(fields)):
         fname = fields[pos]
         data[key].update({
-          fname: jiffyize(cpu_first[key][pos], cpu_second[key][pos])
+          fname: sub(prev[key][pos], cur[key][pos], delta)
         })
 
     return data
