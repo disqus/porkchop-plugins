@@ -61,8 +61,7 @@ class DiskstatsPlugin(PorkchopPlugin):
       prev = self.__class__._cache
       delta = time.time() - self.__class__._lastrefresh
 
-    cur = read_info()
-    self.__class__._cache = cur
+    self.__class__._cache = cur = read_info()
 
     for key in prev.keys():
       try:
