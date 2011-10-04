@@ -9,7 +9,7 @@ class FacterPlugin(PorkchopPlugin):
     r1 = re.compile('(.*?)\s=>\s(.*)')
 
     output = Popen(['facter'], stdout=PIPE, shell=True).communicate()[0]
-    for line in output.split('\n'):
+    for line in output.splitlines():
       match = r1.match(line)
       if match:
         d1[match.group(1)] = match.group(2)

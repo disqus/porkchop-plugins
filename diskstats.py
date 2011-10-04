@@ -65,8 +65,10 @@ class DiskstatsPlugin(PorkchopPlugin):
 
     for key in prev.keys():
       try:
-        avg_req_sz = ((cur[key]['rd_s'] - prev[key]['rd_s']) + (cur[key]['wr_s'] - prev[key]['wr_s'])) /\
-                     ((cur[key]['rd'] + cur[key]['wr']) - (prev[key]['rd'] + prev[key]['wr']))
+        avg_req_sz = ((cur[key]['rd_s'] - prev[key]['rd_s']) +\
+                      (cur[key]['wr_s'] - prev[key]['wr_s'])) /\
+                     ((cur[key]['rd'] + cur[key]['wr']) -\
+                      (prev[key]['rd'] + prev[key]['wr']))
       except ZeroDivisionError:
         avg_req_sz = 0
 
@@ -76,8 +78,10 @@ class DiskstatsPlugin(PorkchopPlugin):
         avg_queue_sz = 0
 
       try:
-        avg_wait = ((cur[key]['rd_t'] - prev[key]['rd_t']) + (cur[key]['wr_t'] - prev[key]['wr_t'])) /\
-                   ((cur[key]['rd'] - prev[key]['rd']) + (cur[key]['wr'] - prev[key]['wr']))
+        avg_wait = ((cur[key]['rd_t'] - prev[key]['rd_t']) +\
+                    (cur[key]['wr_t'] - prev[key]['wr_t'])) /\
+                   ((cur[key]['rd'] - prev[key]['rd']) +\
+                    (cur[key]['wr'] - prev[key]['wr']))
       except ZeroDivisionError:
         avg_wait = 0
 
@@ -96,17 +100,22 @@ class DiskstatsPlugin(PorkchopPlugin):
       util = sub(prev[key]['use'], cur[key]['use'], delta)
 
       try:
-        svctime = util / sub((prev[key]['rd'] + prev[key]['wr']), (cur[key]['rd'] + cur[key]['wr']), delta)
+        svctime = util / sub((prev[key]['rd'] + prev[key]['wr']),
+                             (cur[key]['rd'] + cur[key]['wr']), delta)
       except ZeroDivisionError:
         svctime = 0
 
       data[key] = {
         'reads_per_second': fmt(sub(prev[key]['rd'], cur[key]['rd'], delta)),
         'writes_per_second': fmt(sub(prev[key]['wr'], cur[key]['wr'], delta)),
-        'read_merges_per_second': fmt(sub(prev[key]['rd_m'], cur[key]['rd_m'], delta)),
-        'write_merges_per_second': fmt(sub(prev[key]['wr_m'], cur[key]['wr_m'], delta)),
-        'read_kilobytes_per_second': fmt(sub(prev[key]['rd_s'], cur[key]['rd_s'], delta) / 2),
-        'write_kilobytes_per_second': fmt(sub(prev[key]['wr_s'], cur[key]['wr_s'], delta) / 2),
+        'read_merges_per_second': fmt(sub(prev[key]['rd_m'], cur[key]['rd_m'],
+                                      delta)),
+        'write_merges_per_second': fmt(sub(prev[key]['wr_m'], cur[key]['wr_m'],
+                                       delta)),
+        'read_kilobytes_per_second': fmt(sub(prev[key]['rd_s'], cur[key]['rd_s'],
+                                         delta) / 2),
+        'write_kilobytes_per_second': fmt(sub(prev[key]['wr_s'], cur[key]['wr_s'],
+                                          delta) / 2),
         'ios_in_progress': fmt(cur[key]['running'] / delta),
         'average_request_size': fmt(avg_req_sz),
         'average_queue_size': fmt(avg_queue_sz / delta),

@@ -46,7 +46,7 @@ class HAProxy(object):
     except socket.error:
       return None
 
-    return ''.join(sock_data).strip('\n').split('\n')
+    return ''.join(sock_data).strip('\n').splitlines()
 
 class HaproxyPlugin(PorkchopPlugin):
   def get_data(self):

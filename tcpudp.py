@@ -12,7 +12,9 @@ class TcpudpPlugin(PorkchopPlugin):
     command = 'ss -tuna'
     data = deepDict()
 
-    output = Popen([command], stdout=PIPE, shell=True).communicate()[0].splitlines()
+    output = Popen([command], stdout=PIPE, shell=True)\
+                   .communicate()[0]\
+                   .splitlines()
 
     output.pop(0)
 
