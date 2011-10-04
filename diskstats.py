@@ -53,7 +53,7 @@ class DiskstatsPlugin(PorkchopPlugin):
   def get_data(self):
     data = {}
 
-    if not self.__class__._cache or self.__class__._lastrefresh:
+    if not self.__class__._cache:
       prev = read_info()
       delta = 1
       time.sleep(delta)

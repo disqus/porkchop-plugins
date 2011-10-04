@@ -39,7 +39,7 @@ class CpuPlugin(PorkchopPlugin):
 
     hz = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
 
-    if not self.__class__._cache or self.__class__._lastrefresh:
+    if not self.__class__._cache:
       prev = read_info()
       delta = 1
       time.sleep(delta)
