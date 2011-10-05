@@ -47,9 +47,6 @@ def read_info():
   return data
 
 class DiskstatsPlugin(PorkchopPlugin):
-  def __init__(self):
-    self.refresh = 1
-
   def get_data(self):
     data = {}
 
