@@ -45,7 +45,7 @@ class CpuPlugin(PorkchopPlugin):
       time.sleep(delta)
     else:
       prev = self.__class__._cache
-      delta = time.time() - self.__class__._lastrefresh
+      delta = int(time.time() - self.__class__._lastrefresh)
 
     self.__class__._cache = cur = read_info()
 
