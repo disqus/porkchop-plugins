@@ -9,28 +9,24 @@ def sub(a, b, inter):
 def processes_count():
   count = 0
 
-  f = open('/proc/stat', 'r')
+  with open('/proc/stat', 'r') as f:
+    for line in f:
+      if line.startswith('processes'):
+        count = int(line.split()[1])
 
-  for line in f:
-    if line.startswith('processes'):
-      count = int(line.split()[1])
-
-  f.close()
   return count
 
 def thread_count(f):
   threads = 0
 
   try:
-    f = open(f, 'r')
+    with open(f, 'r') as f:
+      for line in f:
+        if line.startswith('Threads:'):
+          count = int(line.split()[1])
   except IOError:
     pass
 
-  for line in f:
-    if line.startswith('Threads:'):
-      count = int(line.split()[1])
-
-  f.close()
   return count
 
 class ProcessesPlugin(PorkchopPlugin):

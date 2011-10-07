@@ -28,22 +28,20 @@ def read_info():
   ]
 
   r1 = re.compile('[a-z]d[a-z]$')
-  f = open('/proc/diskstats', 'r')
+  with open('/proc/diskstats', 'r') as f:
+    for line in f:
+      fields = line.strip().split()
+      fields.pop(0); fields.pop(0)
+      device = fields[0]
+      fields.pop(0)
 
-  for line in f:
-    fields = line.strip().split()
-    fields.pop(0); fields.pop(0)
-    device = fields[0]
-    fields.pop(0)
+      if not r1.match(device): continue
 
-    if not r1.match(device): continue
+      data.setdefault(device, {})
 
-    data.setdefault(device, {})
+      for pos in xrange(len(fields)):
+        data[device][stat_fields[pos]] = float(fields[pos])
 
-    for pos in xrange(len(fields)):
-      data[device][stat_fields[pos]] = float(fields[pos])
-
-  f.close()
   return data
 
 class DiskstatsPlugin(PorkchopPlugin):

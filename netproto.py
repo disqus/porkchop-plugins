@@ -7,17 +7,16 @@ def sub(a, b, inter):
 
 def read_info():
   data = {}
-  f = open('/proc/net/snmp', 'r')
+  with open('/proc/net/snmp', 'r') as f:
+    for line in f:
+      fields = line.split()
+      proto = fields[0].lower().rstrip(':')
 
-  for line in f:
-    fields = line.split()
-    proto = fields[0].lower().rstrip(':')
-
-    if not proto in data.keys():
-      data.setdefault(proto, {})
-      keys = [fld.lower() for fld in fields[1:]]
-    else:
-      data[proto] = dict(zip(keys, tuple(fields[1:])))
+      if not proto in data.keys():
+        data.setdefault(proto, {})
+        keys = [fld.lower() for fld in fields[1:]]
+      else:
+        data[proto] = dict(zip(keys, tuple(fields[1:])))
 
   return data
 

@@ -11,16 +11,14 @@ def sub(a, b, inter):
 def read_info():
   data = {}
 
-  f = open('/proc/stat', 'r')
+  with open('/proc/stat', 'r') as f:
+    for line in f:
+      if line.startswith('cpu'):
+        fields = line.split()
+        data[fields[0]] = fields[1:]
+      else:
+        break
 
-  for line in f:
-    if line.startswith('cpu'):
-      fields = line.split()
-      data[fields[0]] = fields[1:]
-    else:
-      break
-
-  f.close()
   return data
 
 class CpuPlugin(PorkchopPlugin):

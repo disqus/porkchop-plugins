@@ -12,8 +12,9 @@ def sub(a, b, inter):
 def read_info():
   data = deepDict()
 
-  f = open('/proc/net/dev', 'r')
-  output = f.readlines()
+  with open('/proc/net/dev', 'r') as f:
+    output = f.readlines()
+
   output.pop(0)
 
   keys = output[0].replace('|','').split()[1:]
