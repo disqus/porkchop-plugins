@@ -3,7 +3,7 @@ import time
 from porkchop.plugin import PorkchopPlugin
 
 def sub(a, b, inter):
-  return (int(b) - int(a)) / inter if (int(b) - int(a)) else 0
+  return (int(b) - int(a)) / inter if (int(b) - int(a)) > 0 else 0
 
 def read_info():
   data = {}

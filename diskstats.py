@@ -8,7 +8,7 @@ def fmt(f):
   return '%.2f' % f
 
 def sub(a, b, inter):
-  return (b - a) / inter if (b - a) else 0
+  return (b - a) / inter if (b - a) > 0 else 0
 
 def read_info():
   data = {}
