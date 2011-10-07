@@ -7,7 +7,7 @@ def sub(a, b, inter):
   return (b - a) / inter if (b - a) > 0 else 0
 
 def read_info():
-  count = None
+  count = 0
 
   f = open('/proc/stat', 'r')
 
