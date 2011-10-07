@@ -13,10 +13,10 @@ def read_info():
 
   for line in f:
     if line.startswith('processes'):
-      count = line.split()[1]
+      count = int(line.split()[1])
 
   f.close()
-  return int(count)
+  return count
 
 class ProcessesPlugin(PorkchopPlugin):
   def get_data(self):
@@ -24,8 +24,6 @@ class ProcessesPlugin(PorkchopPlugin):
 
     data['count'] = len(glob.glob('/proc/[1-9]*'))
 
-    import pdb
-    pdb.set_trace()
     if not self.__class__._cache:
       prev = read_info()
       delta = 1
