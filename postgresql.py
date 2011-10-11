@@ -31,6 +31,7 @@ class PostgresqlPlugin(PorkchopPlugin):
         self.config['postgresql']['password'])
 
       conn = psycopg2.connect(conn_string)
+      conn.set_isolation_level(0) # don't need transactions
     except:
       return None
 
