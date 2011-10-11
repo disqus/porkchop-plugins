@@ -3,9 +3,6 @@ import time
 
 from porkchop.plugin import PorkchopPlugin
 
-def sub(a, b, inter):
-  return (b - a) / inter if (b - a) > 0 else 0
-
 def processes_count():
   count = 0
 
@@ -48,6 +45,6 @@ class ProcessesPlugin(PorkchopPlugin):
 
     self.__class__._cache = cur = processes_count()
 
-    data['forkrate'] = sub(prev, cur, delta)
+    data['forkrate'] = self.rateof(prev, cur, delta)
 
     return data

@@ -3,14 +3,10 @@ from subprocess import Popen, PIPE
 
 from porkchop.plugin import PorkchopPlugin
 
-def deepDict():
-  """ wat """
-  return defaultdict(deepDict)
-
 class TcpudpPlugin(PorkchopPlugin):
   def get_data(self):
     command = 'ss -tuna'
-    data = deepDict()
+    data = self.gendict()
 
     output = Popen([command], stdout=PIPE, shell=True)\
                    .communicate()[0]\

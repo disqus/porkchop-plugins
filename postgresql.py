@@ -4,9 +4,6 @@ import psycopg2.extras
 
 from porkchop.plugin import PorkchopPlugin
 
-def deepDict():
-  return defaultdict(deepDict)
-
 def exc(conn, query, col_key = None, col_val = None):
   data = {}
   cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -38,7 +35,7 @@ class PostgresqlPlugin(PorkchopPlugin):
     return conn
 
   def get_data(self):
-    data = deepDict()
+    data = self.gendict()
     conn = self._connect()
 
     datname_list_query = "SELECT datname FROM pg_database \

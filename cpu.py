@@ -2,12 +2,6 @@ import os
 import time
 
 from porkchop.plugin import PorkchopPlugin
-
-def sub(a, b, inter):
-  jiffy = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
-
-  return (float(b) - float(a)) / inter * 100 / jiffy
-
 def read_info():
   data = {}
 
@@ -52,7 +46,14 @@ class CpuPlugin(PorkchopPlugin):
       for pos in xrange(len(fields)):
         fname = fields[pos]
         data[key].update({
-          fname: sub(prev[key][pos], cur[key][pos], delta)
+          fname: self.rateof(prev[key][pos], cur[key][pos], delta)
         })
 
     return data
+
+  def rateof(self, a, b, ival):
+    jiffy = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
+
+    return (float(b) - float(a)) / ival * 100 / jiffy
+
+

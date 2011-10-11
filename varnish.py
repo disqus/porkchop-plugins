@@ -3,9 +3,6 @@ import time
 
 from porkchop.plugin import PorkchopPlugin
 
-def rateof(a, b, ival):
-  return (float(b) - float(a)) / ival if (float(b) - float(a)) > 0 else 0
-
 def varnish_stats():
   data = {}
   cmd = 'varnishstat -1'
@@ -38,6 +35,7 @@ class VarnishPlugin(PorkchopPlugin):
     for metric in data.keys():
       if data[metric]['longterm_per_second'] > 0:
         data[metric]['shortterm_per_second'] =\
-          rateof(prev[metric]['counter'], cur[metric]['counter'], ival)
+          self.rateof(prev[metric]['counter'],
+                      cur[metric]['counter'], ival)
 
     return data

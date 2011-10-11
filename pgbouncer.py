@@ -37,7 +37,7 @@ class PgbouncerPlugin(PorkchopPlugin):
     return conn
 
   def get_data(self):
-    data = self.deepDict()
+    data = self.gendict()
 
     instances = self._get_instances()
 
@@ -55,7 +55,7 @@ class PgbouncerPlugin(PorkchopPlugin):
   def _get_instances(self):
     configs = glob.glob('/etc/pgbouncer/*.ini')
     r1 = re.compile('^listen_(addr|port)\s+=\s+(.*)$')
-    instances = self.deepDict()
+    instances = self.gendict()
 
     for file in configs:
       inst = file.split('/')[3].split('.')[0]
@@ -69,7 +69,7 @@ class PgbouncerPlugin(PorkchopPlugin):
     return instances
 
   def _instance_stats(self, conn):
-    data = self.deepDict()
+    data = self.gendict()
 
     for row in exc(conn, 'show stats'):
       for col in [key for key in row.keys() if key != 'database']:

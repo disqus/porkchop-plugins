@@ -7,8 +7,6 @@ from porkchop.plugin import PorkchopPlugin
 def fmt(f):
   return '%.2f' % f
 
-def sub(a, b, inter):
-  return (b - a) / inter if (b - a) > 0 else 0
 
 def read_info():
   data = {}
@@ -92,25 +90,27 @@ class DiskstatsPlugin(PorkchopPlugin):
       except ZeroDivisionError:
         avg_write_wait = 0
 
-      util = sub(prev[key]['use'], cur[key]['use'], delta)
+      util = self.rateof(prev[key]['use'], cur[key]['use'], delta)
 
       try:
-        svctime = util / sub((prev[key]['rd'] + prev[key]['wr']),
+        svctime = util / self.rateof((prev[key]['rd'] + prev[key]['wr']),
                              (cur[key]['rd'] + cur[key]['wr']), delta)
       except ZeroDivisionError:
         svctime = 0
 
       data[key] = {
-        'reads_per_second': fmt(sub(prev[key]['rd'], cur[key]['rd'], delta)),
-        'writes_per_second': fmt(sub(prev[key]['wr'], cur[key]['wr'], delta)),
-        'read_merges_per_second': fmt(sub(prev[key]['rd_m'], cur[key]['rd_m'],
-                                      delta)),
-        'write_merges_per_second': fmt(sub(prev[key]['wr_m'], cur[key]['wr_m'],
-                                       delta)),
-        'read_kilobytes_per_second': fmt(sub(prev[key]['rd_s'], cur[key]['rd_s'],
-                                         delta) / 2),
-        'write_kilobytes_per_second': fmt(sub(prev[key]['wr_s'], cur[key]['wr_s'],
-                                          delta) / 2),
+        'reads_per_second': fmt(self.rateof(prev[key]['rd'],
+                                cur[key]['rd'], delta)),
+        'writes_per_second': fmt(self.rateof(prev[key]['wr'],
+                                 cur[key]['wr'], delta)),
+        'read_merges_per_second': fmt(self.rateof(prev[key]['rd_m'],
+                                      cur[key]['rd_m'], delta)),
+        'write_merges_per_second': fmt(self.rateof(prev[key]['wr_m'],
+                                       cur[key]['wr_m'], delta)),
+        'read_kilobytes_per_second': fmt(self.rateof(prev[key]['rd_s'],
+                                         cur[key]['rd_s'], delta) / 2),
+        'write_kilobytes_per_second': fmt(self.rateof(prev[key]['wr_s'],
+                                          cur[key]['wr_s'], delta) / 2),
         'ios_in_progress': fmt(cur[key]['running'] / delta),
         'average_request_size': fmt(avg_req_sz),
         'average_queue_size': fmt(avg_queue_sz / delta),

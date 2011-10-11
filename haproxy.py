@@ -44,7 +44,7 @@ class HAProxy(object):
 
       sock.close()
     except socket.error:
-      return None
+      return []
 
     return ''.join(sock_data).strip('\n').splitlines()
 
