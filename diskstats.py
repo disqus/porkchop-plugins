@@ -75,6 +75,7 @@ class DiskstatsPlugin(PorkchopPlugin):
                     (cur[key]['wr_t'] - prev[key]['wr_t'])) /\
                    ((cur[key]['rd'] - prev[key]['rd']) +\
                     (cur[key]['wr'] - prev[key]['wr']))
+        avg_wait = avg_wait if avg_wait > 0 else 0
       except ZeroDivisionError:
         avg_wait = 0
 
