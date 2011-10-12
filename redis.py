@@ -13,7 +13,7 @@ class RedisPlugin(PorkchopPlugin):
     return sock
 
   def get_data(self):
-    data = {}
+    data = self.gendict()
 
     try:
       instance_config = self.config['redis']['instances']
@@ -48,11 +48,10 @@ class RedisPlugin(PorkchopPlugin):
         # one of them is allocation_stats but its format is
         # all fucked up
         if ',' in v and k != 'allocation_stats':
-          data[k] = {}
           for stat in v.split(','):
             k2, v2 = stat.split('=')
-            data[k][k2] = v2
+            data[port][k][k2] = v2
         else:
-          data[k] = v
+          data[port][k] = v
 
     return data

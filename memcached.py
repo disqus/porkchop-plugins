@@ -13,7 +13,7 @@ class MemcachedPlugin(PorkchopPlugin):
     return sock
 
   def get_data(self):
-    data = {}
+    data = self.gendict()
     resp_data = ''
 
     try:
@@ -39,6 +39,6 @@ class MemcachedPlugin(PorkchopPlugin):
       for line in resp_data.splitlines():
         if not line.startswith('STAT'): continue
         trash, k, v = line.split()
-        data[k] = v
+        data[port][k] = v
 
     return data
