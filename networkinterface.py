@@ -40,8 +40,8 @@ class NetworkinterfacePlugin(PorkchopPlugin):
     xmit_keys = tuple(keys[8:])
 
     for line in output[1:]:
-      fields = line.split()
-      iface = fields.pop(0).strip(':')
+      (iface, fields) = line.strip().split(':')
+      fields = fields.split()
       recv_tup = tuple(fields[0:8])
       xmit_tup = tuple(fields[8:])
       data[iface]['recv'] = dict(zip(recv_keys, recv_tup))
