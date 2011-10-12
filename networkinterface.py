@@ -35,7 +35,7 @@ class NetworkinterfacePlugin(PorkchopPlugin):
 
     output.pop(0)
 
-    keys = output[0].replace('|','').split()[1:]
+    keys = output[0].replace('|',' ').split()[1:]
     recv_keys = tuple(keys[0:8])
     xmit_keys = tuple(keys[8:])
 
