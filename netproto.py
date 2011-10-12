@@ -33,6 +33,7 @@ class NetprotoPlugin(PorkchopPlugin):
 
         if not proto in data.keys():
           keys = [fld.lower() for fld in fields[1:]]
+          data[proto] = {}
         else:
           data[proto] = dict(zip(keys, tuple(fields[1:])))
 
