@@ -15,10 +15,8 @@ class RedisPlugin(PorkchopPlugin):
   def get_data(self):
     data = self.gendict()
 
-    try:
-      instance_config = self.config['redis']['instances']
-    except:
-      instance_config = 'localhost:6379'
+    instance_config = self.config.get('redis', {}).get('instances',
+      'localhost:6379')
 
     instances = [s.strip().split(':') for s in instance_config.split(',')]
 

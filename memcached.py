@@ -16,10 +16,8 @@ class MemcachedPlugin(PorkchopPlugin):
     data = self.gendict()
     resp_data = ''
 
-    try:
-      instance_config = self.config['memcached']['instances']
-    except:
-      instance_config = 'localhost:11211'
+    instance_config = self.config.get('memcached', {}).get('instances',
+      'localhost:11211')
 
     instances = [s.strip().split(':') for s in instance_config.split(',')]
 

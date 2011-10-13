@@ -4,10 +4,8 @@ from porkchop.plugin import PorkchopPlugin
 
 class RiakPlugin(PorkchopPlugin):
   def get_data(self):
-    try:
-      stats_url = self.config['riak']['stats_url']
-    except:
-      stats_url = 'http://localhost:8098/stats'
+    stats_url = self.config.get('riak', {}).get('stats_url',
+      'http://localhost:8098/stats')
 
     stats = json.loads(urllib2.urlopen(stats_url).read())
 
