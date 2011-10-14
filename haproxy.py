@@ -51,7 +51,7 @@ class HAProxy(object):
 class HaproxyPlugin(PorkchopPlugin):
   def get_data(self):
     all_stats = []
-    d1 = {}
+    d1 = self.gendict()
     r1 = re.compile('^(#|$)')
 
     for line in HAProxy.stats(HAPROXY_SOCKET):
@@ -71,18 +71,9 @@ class HaproxyPlugin(PorkchopPlugin):
 
       all_stats.append(stat)
 
-    vip = {}
-    d1['vip'] = {}
     for x in all_stats:
-      vip.setdefault(x['vip_name'], {})
-      vip[x['vip_name']].setdefault('backend', {})
-      vip[x['vip_name']]['backend'].update({x['backend_name']: {}})
-
-
       for key, val in x.iteritems():
         r2 = re.compile('_name')
-        vip[x['vip_name']]['backend'][x['backend_name']].update({key: val})
-
-      d1['vip'].update(vip)
+        d1[x['vip_name']]['backend'][x['backend_name']][key] = val
 
     return d1
