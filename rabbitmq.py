@@ -35,8 +35,7 @@ class RabbitmqPlugin(PorkchopPlugin):
   def get_data(self):
     output = {}
 
-    vhosts = self.get_vhosts()
-    for vhost in vhosts:
+    for vhost in self.get_vhosts():
       queues = self.get_queues(vhost)
       if vhost == '/':
         vhost = 'default'
