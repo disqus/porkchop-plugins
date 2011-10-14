@@ -43,4 +43,4 @@ class RabbitmqPlugin(PorkchopPlugin):
       if queues:
         output[vhost] = queues
 
-    return {'vhost': output}
+    return output 
