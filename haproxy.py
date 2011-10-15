@@ -74,6 +74,6 @@ class HaproxyPlugin(PorkchopPlugin):
     for x in all_stats:
       for key, val in x.iteritems():
         r2 = re.compile('_name')
-        d1[x['vip_name']]['backend'][x['backend_name']][key] = val
+        d1[x['vip_name']][x['backend_name']][key] = val
 
     return d1
