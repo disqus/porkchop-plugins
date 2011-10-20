@@ -40,6 +40,10 @@ class RedisPlugin(PorkchopPlugin):
         continue
 
       for line in resp_data.splitlines():
+        # apparently some versions of redis have comments and empty lines
+        if not line or line.startswith('#'):
+          continue
+
         k, v = line.split(':', 1)
 
         # some stat values are CSV, k/v delimited with an '='
