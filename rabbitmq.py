@@ -1,5 +1,4 @@
 from porkchop.plugin import PorkchopPlugin
-from porkchop.commandline import get_logger
 import json
 import requests
 from subprocess import Popen, PIPE
@@ -10,13 +9,10 @@ class RabbitmqPlugin(PorkchopPlugin):
 
     def get_data(self):
         api = RabbitmqWeb()
-        log = get_logger('porkchop-collector')
         if api.try_api():
-            log.info("rabbitmq - Using web api")
             return api.get_data()
 
         cli = RabbitmqCli()
-        log.info("rabbitmq - Using cli")
         return cli.get_data()
 
 
