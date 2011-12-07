@@ -22,8 +22,8 @@ class PostfixPlugin(PorkchopPlugin):
         output = Popen([cmd], stdout=PIPE, shell=True).communicate()[0].splitlines()
 
         # Use headers as keys just in case change to linear output
-        intervals = [''.join([intv, 's']) for intv in output[0].split()]
-        # "total" makes more sense than "Ts"
+        intervals = [''.join([intv, 'm']) for intv in output[0].split()]
+        # "total" makes more sense than "Tm"
         intervals[0] = "total"
 
         for line in output[1:]:
