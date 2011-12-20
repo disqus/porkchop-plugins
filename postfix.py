@@ -23,10 +23,10 @@ class PostfixPlugin(PorkchopPlugin):
 
         # Use headers as keys just in case change to linear output
         intervals = [''.join([intv, 'm']) for intv in output[0].split()]
-        # "total" makes more sense than "Tm"
-        intervals[0] = "total"
+        # Drop Total
+        intervals.pop(0)
 
-        for line in output[1:]:
+        for line in output[2:]:
             fields = line.split()
 
             domain_metrics = {}
@@ -49,8 +49,6 @@ class PostfixPlugin(PorkchopPlugin):
 
         for queue in queues:
             queue_stats = self.get_queue_stats(queue)
-
-            data['global'].update({queue: queue_stats.pop('TOTAL')})
 
             for domain, stats in queue_stats.iteritems():
                 all_domains.setdefault(domain, {}).update({queue: stats})
