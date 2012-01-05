@@ -7,13 +7,25 @@ from subprocess import Popen, PIPE
 class RabbitmqPlugin(PorkchopPlugin):
     """Try to use web plugin, otherwise fall back to the cli"""
 
-    def get_data(self):
-        api = RabbitmqWeb()
-        if api.try_api():
-            return api.get_data()
+    def use_api(self):
+        api = RabbitmqWeb(host, port, user, passwd)
+        return api.get_data()
 
+    def use_cli(self):
         cli = RabbitmqCli()
         return cli.get_data()
+
+    def get_data(self):
+        config = self.config.get('rabbitmq', {})
+        self.user = config.get('user', 'guest')
+        self.passwd = config.get('passwd', 'guest')
+        self.host = config.get('host', 'localhost')
+        self.port = config.get('port', 5622)
+
+        try:
+            return self.use_api()
+        except:
+            return self.use_cli()
 
 
 class RabbitmqCli(object):
@@ -61,36 +73,24 @@ class RabbitmqCli(object):
         return output
 
 
-class RabbitmqWeb(PorkchopPlugin):
+class RabbitmqWeb(object):
     """RabbitMQ status using the management API.
     requires http://www.rabbitmq.com/management.html
-
-    This can (and should) be subclassed to use your own authentication.
-
-    Something like:
-
-    # myrabbitmqplugin.py
-    class MyRabbitmqPlugin(RabbitmqWeb):
-
-        def __init__(self):
-            RabbitmqWeb.__init__(self, 'localhost', 55672, 'user', 'passwd')
     """
 
-    def __init__(self, host=None, port=None, user=None, passwd=None):
-        self.user = user or 'guest'
-        self.passwd = passwd or 'guest'
-        self.host = host or 'localhost'
-        self.port = port or 55672
+    def __init__(self, host, port, user, passwd):
+        self.user = user
+        self.passwd = passwd
+        self.host = host
+        self.port = port
         self.url = self.construct_url()
-        PorkchopPlugin.__init__(self)
+        self.try_api()
 
     def try_api(self):
         test_url = "%s/aliveness-test/%%2F" % self.url
         r = requests.get(test_url, auth=(self.user, self.passwd))
 
-        if isinstance(r.error, requests.Timeout) or r.status_code == 401:
-            return False
-        return True
+        r.raise_for_status()
 
     def construct_url(self):
         return "http://%s:%s/api" %(self.host, self.port)
