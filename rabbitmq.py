@@ -20,7 +20,7 @@ class RabbitmqPlugin(PorkchopPlugin):
         self.user = config.get('user', 'guest')
         self.passwd = config.get('passwd', 'guest')
         self.host = config.get('host', 'localhost')
-        self.port = config.get('port', 5622)
+        self.port = config.get('port', 55672)
 
         try:
             return self.use_api()
