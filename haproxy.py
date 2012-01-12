@@ -31,6 +31,7 @@ class HAProxy(object):
   def stats(self, sock_path):
     try:
       sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+      sock.settimeout(3)
       sock.connect(sock_path)
       sock_data = []
       data = ''
