@@ -8,7 +8,7 @@ class RabbitmqPlugin(PorkchopPlugin):
     """Try to use web plugin, otherwise fall back to the cli"""
 
     def use_api(self):
-        api = RabbitmqWeb(host, port, user, passwd)
+        api = RabbitmqWeb(self.host, self.port, self.user, self.passwd)
         return api.get_data()
 
     def use_cli(self):
@@ -20,7 +20,7 @@ class RabbitmqPlugin(PorkchopPlugin):
         self.user = config.get('user', 'guest')
         self.passwd = config.get('passwd', 'guest')
         self.host = config.get('host', 'localhost')
-        self.port = config.get('port', 55672)
+        self.port = config.get('port', 5672)
 
         try:
             return self.use_api()
