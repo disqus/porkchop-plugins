@@ -15,12 +15,12 @@ class HAProxy(object):
         6: 'sessions_limit', 7: 'sessions_total', 8: 'bytes_in',
         9: 'bytes_out', 10: 'denied_req', 11: 'denied_resp',
         12: 'errors_req', 13: 'errors_conn', 14: 'errors_resp',
-        15: 'warnings_retr', 16: 'warnings_redis', #17: 'server_status',
+        15: 'warnings_retr', 16: 'warnings_redis', 17: 'server_status',
         18: 'server_weight', 19: 'server_active', 20: 'server_backup',
         21: 'server_check', 22: 'server_down', 23: 'server_lastchange',
         24: 'server_downtime', 25: 'queue_limit', 29: 'server_throttle',
         30: 'sessions_lbtotal', 32: 'session_type', 33: 'session_rate_cur',
-        34: 'session_rate_limit', 35: 'session_rate_max'
+        34: 'session_rate_limit', 35: 'session_rate_max', 36: 'check_status'
       }[idx]
     except KeyError:
       ret = None
@@ -31,7 +31,6 @@ class HAProxy(object):
   def stats(self, sock_path):
     try:
       sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-      sock.settimeout(3)
       sock.connect(sock_path)
       sock_data = []
       data = ''
