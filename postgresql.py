@@ -111,6 +111,16 @@ class PostgresqlPlugin(PorkchopPlugin):
                          COALESCE(sum(n_tup_del),0) AS deleted, \
                          COALESCE(sum(n_tup_hot_upd),0) AS hotupdated \
                          FROM pg_stat_user_tables"
+    table_tuple_access_query = """SELECT schemaname, relname, COALESCE(seq_tup_read,0) AS seqread,
+                               COALESCE(idx_tup_fetch,0) AS idxfetch,
+                               COALESCE(n_tup_ins,0) AS inserted,
+                               COALESCE(n_tup_upd,0) AS updated,
+                               COALESCE(n_tup_del,0) AS deleted,
+                               COALESCE(n_tup_hot_upd,0) AS hotupdated
+                               FROM pg_stat_user_tables
+                               WHERE schemaname = 'public'"""
+
+
 
     data['query_time'] = exc(conn, query_time_query, 'type', 'coalesce')
     datnames = exc(conn, datname_list_query)[0]
@@ -148,6 +158,13 @@ class PostgresqlPlugin(PorkchopPlugin):
       row = exc(conn2, scan_type_query)[0]
       for key in row.keys():
         data['scans'][db][key] = row[key]
+
+      results = exc(conn2, table_tuple_access_query)
+      for row in results:
+        row_result = data['table_stats'][db][row['schemaname']][row['relname']]
+        for key in (k for k in row.keys() if k not in ('schemaname', 'relname')):
+          row_result[key] = row[key]
+
 
     try:
       slony_db = self.config['postgresql']['slony_db']
