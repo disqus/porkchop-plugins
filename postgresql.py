@@ -26,10 +26,11 @@ class PostgresqlPlugin(PorkchopPlugin):
         dbname,
         self.config['postgresql']['user'],
         self.config['postgresql']['password'])
-
+      print conn_string
       conn = psycopg2.connect(conn_string)
       conn.set_isolation_level(0) # don't need transactions
-    except:
+    except Exception, e:
+      self.log_error('Unable to connect to database %s on %s: %s' % (dbname, self.config['postgresql']['host'], e))
       return None
 
     return conn
@@ -123,7 +124,8 @@ class PostgresqlPlugin(PorkchopPlugin):
 
 
     data['query_time'] = exc(conn, query_time_query, 'type', 'coalesce')
-    datnames = exc(conn, datname_list_query)[0]
+    results = exc(conn, datname_list_query)
+    datnames = [d[0] for d in results]
     data['datnames'] = ', '.join(datnames)
 
     row = exc(conn, 'SELECT * from pg_stat_bgwriter')[0]
@@ -151,6 +153,8 @@ class PostgresqlPlugin(PorkchopPlugin):
 
     for db in datnames:
       conn2 = self._connect(db)
+      if conn2 is None:
+        continue
       row = exc(conn2, tuple_access_query)[0]
       for key in row.keys():
         data['tuple_access'][db][key] = row[key]
