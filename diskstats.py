@@ -120,4 +120,4 @@ class DiskstatsPlugin(PorkchopPlugin):
                 'util': fmt(util / 10)
             }
 
-        return data
+        return result
