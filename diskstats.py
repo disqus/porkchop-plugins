@@ -114,8 +114,8 @@ class DiskstatsPlugin(PorkchopPlugin):
                 'average_request_size': fmt(avg_req_sz),
                 'average_queue_size': fmt(avg_queue_sz / self.delta),
                 'average_wait': fmt(avg_wait),
-                'averate_read_wait': fmt(avg_read_wait),
-                'averate_write_wait': fmt(avg_write_wait),
+                'average_read_wait': fmt(avg_read_wait),
+                'average_write_wait': fmt(avg_write_wait),
                 'svctime': fmt(svctime),
                 'util': fmt(util / 10)
             }
