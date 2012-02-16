@@ -179,13 +179,13 @@ class PostgresqlPlugin(PorkchopPlugin):
         result = data.copy()
 
         # change tuple_stats to be rateof
-        for db, db_data in data['tuple_stats'].iteritems():
+        for db, db_data in result['tuple_stats'].iteritems():
             for key, value in db_data.iteritems():
                 prev_value = self.prev_data['tuple_stats'][db][key] or 0
                 db_data['rate_' + key] = fmt(self.rateof(prev_value, value))
 
         # change table_stats to be rateof
-        for db, db_data in data['table_stats'].iteritems():
+        for db, db_data in result['table_stats'].iteritems():
             for schema_name, schema_data in db_data.iteritems():
                 for table_name, table_data in schema_data.iteritems():
                     for key, value in table_data.iteritems():
