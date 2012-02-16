@@ -11,7 +11,7 @@ class FacterPlugin(PorkchopPlugin):
 
         proc = Popen(['facter'], stdout=PIPE, stderr=PIPE, shell=True)
         output = proc.communicate()[0]
-        if proc.returncode == 0:
+        if proc.returncode != 0:
             return {}
 
         for line in output.splitlines():
