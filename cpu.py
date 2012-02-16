@@ -46,7 +46,7 @@ class CpuPlugin(PorkchopPlugin):
                     fname: self.rateof(prev[key][pos], data[key][pos])
                 })
 
-        return data
+        return result
 
     def rateof(self, a, b):
         jiffy = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
