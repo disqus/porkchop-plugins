@@ -33,4 +33,4 @@ class VarnishPlugin(PorkchopPlugin):
                     self.rateof(prev[metric]['counter'],
                                 data[metric]['counter'])
 
-        return data
+        return result
