@@ -142,18 +142,18 @@ class PostgresqlPlugin(PorkchopPlugin):
             if conn2 is None:
                 continue
             row = exc(conn2, tuple_access_query)[0]
-            for key in row.keys():
+            for key in row.iterkeys():
                 data['tuple_access'][db][key] = row[key]
 
             row = exc(conn2, scan_type_query)[0]
-            for key in row.keys():
+            for key in row.iterkeys():
                 data['scans'][db][key] = row[key]
 
             # Grab statistics per table
             results = exc(conn2, table_tuple_access_query)
             for row in results:
                 row_result = data['table_stats'][db][row['schemaname']][row['relname']]
-                for key in (k for k in row.keys() if k not in ('schemaname', 'relname')):
+                for key in (k for k in row.iterkeys() if k not in ('schemaname', 'relname')):
                     row_result[key] = row[key]
 
         try:
@@ -177,12 +177,20 @@ class PostgresqlPlugin(PorkchopPlugin):
 
     def format_data(self, data):
         result = data.copy()
+
+        # change tuple_stats to be rateof
+        for db, db_data in data['tuple_stats'].iteritems():
+            for key, value in db_data.iteritems():
+                prev_value = self.prev_data['tuple_stats'][db][key] or 0
+                db_data['rate_' + key] = fmt(self.rateof(prev_value, value))
+
+        # change table_stats to be rateof
         for db, db_data in data['table_stats'].iteritems():
             for schema_name, schema_data in db_data.iteritems():
                 for table_name, table_data in schema_data.iteritems():
                     for key, value in table_data.iteritems():
-                        prev_value = self.prev_data[db][schema_name][table_name][key] or 0
-                        table_data[key] = fmt(self.rateof(prev_value, value))
+                        prev_value = self.prev_data['table_stats'][db][schema_name][table_name][key] or 0
+                        table_data['rate_' + key] = fmt(self.rateof(prev_value, value))
         return result
 
     def _get_bgwriter_data(self, conn):
@@ -192,7 +200,7 @@ class PostgresqlPlugin(PorkchopPlugin):
             return None
 
         result = {}
-        for key in row.keys():
+        for key in row.iterkeys():
             result[key] = row[key]
         return result
 
@@ -209,7 +217,7 @@ class PostgresqlPlugin(PorkchopPlugin):
             return None
 
         result = {}
-        for key in row.keys():
+        for key in row.iterkeys():
             result[key] = row[key]
 
         return result
@@ -226,7 +234,7 @@ class PostgresqlPlugin(PorkchopPlugin):
             return None
 
         result = {}
-        for key in row.keys():
+        for key in row.iterkeys():
             result[key] = row[key]
         return result
 
