@@ -1,3 +1,4 @@
+import copy
 from subprocess import Popen, PIPE
 
 from porkchop.plugin import PorkchopPlugin
@@ -24,7 +25,7 @@ class VarnishPlugin(PorkchopPlugin):
         return data
 
     def format_data(self, data):
-        result = data.copy()
+        result = copy.deepcopy(data.copy)
         prev = self.prev_data
 
         for metric in data.iterkeys():

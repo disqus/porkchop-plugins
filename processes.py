@@ -1,3 +1,4 @@
+import copy
 import glob
 import os.path
 
@@ -45,7 +46,7 @@ class ProcessesPlugin(PorkchopPlugin):
         return data
 
     def format_data(self, data):
-        result = data.copy()
+        result = copy.deepcopy(data.copy)
         prev = self.prev_data
 
         if data['processes']:

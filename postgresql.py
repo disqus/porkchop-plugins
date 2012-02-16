@@ -1,3 +1,4 @@
+import copy
 import psycopg2
 import psycopg2.extras
 
@@ -107,14 +108,6 @@ class PostgresqlPlugin(PorkchopPlugin):
                              COALESCE(sum(n_tup_del),0) AS deleted, \
                              COALESCE(sum(n_tup_hot_upd),0) AS hotupdated \
                              FROM pg_stat_user_tables"
-        table_tuple_access_query = """SELECT schemaname, relname, COALESCE(seq_tup_read,0) AS seqread,
-                                   COALESCE(idx_tup_fetch,0) AS idxfetch,
-                                   COALESCE(n_tup_ins,0) AS inserted,
-                                   COALESCE(n_tup_upd,0) AS updated,
-                                   COALESCE(n_tup_del,0) AS deleted,
-                                   COALESCE(n_tup_hot_upd,0) AS hotupdated
-                                   FROM pg_stat_user_tables
-                                   WHERE schemaname = 'public'"""
 
         datnames = self._get_db_names(conn)
         data['datnames'] = ', '.join(datnames)
@@ -150,11 +143,7 @@ class PostgresqlPlugin(PorkchopPlugin):
                 data['scans'][db][key] = row[key]
 
             # Grab statistics per table
-            results = exc(conn2, table_tuple_access_query)
-            for row in results:
-                row_result = data['table_stats'][db][row['schemaname']][row['relname']]
-                for key in (k for k in row.iterkeys() if k not in ('schemaname', 'relname')):
-                    row_result[key] = row[key]
+            data['table_stats'][db] = self._get_table_stats(conn2)
 
         try:
             slony_db = self.config['postgresql']['slony_db']
@@ -176,21 +165,21 @@ class PostgresqlPlugin(PorkchopPlugin):
         return data
 
     def format_data(self, data):
-        result = data.copy()
+        result = copy.deepcopy(data)
 
         # change tuple_stats to be rateof
-        for db, db_data in result['tuple_stats'].iteritems():
+        for db, db_data in data['tuple_access'].iteritems():
             for key, value in db_data.iteritems():
                 prev_value = self.prev_data['tuple_stats'][db][key] or 0
-                db_data['rate_' + key] = fmt(self.rateof(prev_value, value))
+                result['tuple_access'][db]['rate_' + key] = fmt(self.rateof(prev_value, value))
 
         # change table_stats to be rateof
-        for db, db_data in result['table_stats'].iteritems():
+        for db, db_data in data['table_stats'].iteritems():
             for schema_name, schema_data in db_data.iteritems():
                 for table_name, table_data in schema_data.iteritems():
                     for key, value in table_data.iteritems():
                         prev_value = self.prev_data['table_stats'][db][schema_name][table_name][key] or 0
-                        table_data['rate_' + key] = fmt(self.rateof(prev_value, value))
+                        result['table_stats'][db][schema_name][table_name]['rate_' + key] = fmt(self.rateof(prev_value, value))
         return result
 
     def _get_bgwriter_data(self, conn):
@@ -247,6 +236,27 @@ class PostgresqlPlugin(PorkchopPlugin):
 
         results = exc(conn, query)
         return [d[0] for d in results]
+
+    def _get_table_stats(self, conn):
+        query = """
+            SELECT schemaname, relname, COALESCE(seq_tup_read,0) AS seqread,
+            COALESCE(idx_tup_fetch,0) AS idxfetch,
+            COALESCE(n_tup_ins,0) AS inserted,
+            COALESCE(n_tup_upd,0) AS updated,
+            COALESCE(n_tup_del,0) AS deleted,
+            COALESCE(n_tup_hot_upd,0) AS hotupdated
+            FROM pg_stat_user_tables
+            WHERE schemaname = 'public'
+        """
+
+        data = {}
+        results = exc(conn, query)
+        for row in results:
+            data.setdefault(row['schemaname'], {})
+            row_result = data[row['schemaname']][row['relname']] = {}
+            for key in (k for k in row.iterkeys() if k not in ('schemaname', 'relname')):
+                row_result[key] = row[key]
+        return data
 
     def _count_num_dbs(self, conn):
         query = """
