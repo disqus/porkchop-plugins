@@ -171,7 +171,7 @@ class PostgresqlPlugin(PorkchopPlugin):
         for db, db_data in data['tuple_access'].iteritems():
             for key, value in db_data.iteritems():
                 prev_value = self.prev_data['tuple_stats'][db][key] or 0
-                result['tuple_access'][db]['rate_' + key] = fmt(self.rateof(prev_value, value))
+                result['tuple_access'][db][key] = fmt(self.rateof(prev_value, value))
 
         # change table_stats to be rateof
         for db, db_data in data['table_stats'].iteritems():
@@ -179,7 +179,7 @@ class PostgresqlPlugin(PorkchopPlugin):
                 for table_name, table_data in schema_data.iteritems():
                     for key, value in table_data.iteritems():
                         prev_value = self.prev_data['table_stats'][db][schema_name][table_name][key] or 0
-                        result['table_stats'][db][schema_name][table_name]['rate_' + key] = fmt(self.rateof(prev_value, value))
+                        result['table_stats'][db][schema_name][table_name][key] = fmt(self.rateof(prev_value, value))
         return result
 
     def _get_bgwriter_data(self, conn):
