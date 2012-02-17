@@ -51,8 +51,11 @@ class CpuPlugin(PorkchopPlugin):
     def rateof(self, a, b):
         jiffy = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
 
+        a = float(a)
+        b = float(b)
+
         try:
-            return (float(b) - float(a)) / self.delta * 100 / jiffy
+            return (b - a) / self.delta * 100 / jiffy
         except ZeroDivisionError:
             if a:
                 return -a
