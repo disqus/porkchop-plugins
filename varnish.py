@@ -25,7 +25,7 @@ class VarnishPlugin(PorkchopPlugin):
         return data
 
     def format_data(self, data):
-        result = copy.deepcopy(data.copy)
+        result = copy.deepcopy(data)
         prev = self.prev_data
 
         for metric in data.iterkeys():

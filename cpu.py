@@ -10,6 +10,8 @@ class CpuPlugin(PorkchopPlugin):
         if not os.path.exists(script):
             return {}
 
+        os.sysconf(os.sysconf_names['SC_CLK_TCK'])
+
         data = {}
 
         with open(script, 'r') as f:
@@ -35,8 +37,6 @@ class CpuPlugin(PorkchopPlugin):
           'irq',
           'softirq'
         ]
-
-        # hz = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
 
         for key in data.iterkeys():
             result.setdefault(key, {})
