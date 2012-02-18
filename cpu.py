@@ -1,59 +1,62 @@
 import os
-import time
 
 from porkchop.plugin import PorkchopPlugin
-def read_info():
-  data = {}
 
-  with open('/proc/stat', 'r') as f:
-    for line in f:
-      if line.startswith('cpu'):
-        fields = line.split()
-        data[fields[0]] = fields[1:]
-      else:
-        break
-
-  return data
 
 class CpuPlugin(PorkchopPlugin):
-  def get_data(self):
-    data = {}
+    def get_data(self):
+        script = '/proc/stat'
 
-    fields = [
-      'user',
-      'nice',
-      'system',
-      'idle',
-      'iowait',
-      'irq',
-      'softirq'
-    ]
+        if not os.path.exists(script):
+            return {}
 
-    hz = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
+        os.sysconf(os.sysconf_names['SC_CLK_TCK'])
 
-    if not self.__class__._cache:
-      prev = read_info()
-      delta = 1
-      time.sleep(delta)
-    else:
-      prev = self.__class__._cache
-      delta = int(time.time() - self.__class__._lastrefresh)
+        data = {}
 
-    self.__class__._cache = cur = read_info()
+        with open(script, 'r') as f:
+            for line in f:
+                if line.startswith('cpu'):
+                    fields = line.split()
+                    data[fields[0]] = fields[1:]
+                else:
+                    break
 
-    for key in cur.keys():
-      data.setdefault(key, {})
-      for pos in xrange(len(fields)):
-        fname = fields[pos]
-        data[key].update({
-          fname: self.rateof(prev[key][pos], cur[key][pos], delta)
-        })
+        return data
 
-    return data
+    def format_data(self, data):
+        result = {}
+        prev = self.prev_data
 
-  def rateof(self, a, b, ival):
-    jiffy = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
+        fields = [
+          'user',
+          'nice',
+          'system',
+          'idle',
+          'iowait',
+          'irq',
+          'softirq'
+        ]
 
-    return (float(b) - float(a)) / ival * 100 / jiffy
+        for key in data.iterkeys():
+            result.setdefault(key, {})
+            for pos in xrange(len(fields)):
+                fname = fields[pos]
+                result[key].update({
+                    fname: self.rateof(prev[key][pos], data[key][pos])
+                })
 
+        return result
 
+    def rateof(self, a, b):
+        jiffy = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
+
+        a = float(a)
+        b = float(b)
+
+        try:
+            return (b - a) / self.delta * 100 / jiffy
+        except ZeroDivisionError:
+            if a:
+                return -a
+            return b

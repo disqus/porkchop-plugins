@@ -1,13 +1,20 @@
+import os.path
+
 from porkchop.plugin import PorkchopPlugin
 
+
 class OpenfilesPlugin(PorkchopPlugin):
-  def get_data(self):
-    with open('/proc/sys/fs/file-nr', 'r') as f:
-      fields = f.read().split()
+    def get_data(self):
+        script = '/proc/sys/fs/file-nr'
+        if not os.path.exists(script):
+            return {}
 
-    data = {
-      'count': int(fields[0]) - int(fields[1]),
-      'max': fields[2]
-    }
+        with open(script, 'r') as f:
+            fields = f.read().split()
 
-    return data
+            data = {
+                'count': int(fields[0]) - int(fields[1]),
+                'max': fields[2]
+            }
+
+        return data

@@ -1,40 +1,37 @@
-import time
+import os.path
 
 from porkchop.plugin import PorkchopPlugin
 
+
 class NetprotoPlugin(PorkchopPlugin):
-  def get_data(self):
-    data = {}
+    def get_data(self):
+        script = '/proc/net/snmp'
 
-    if not self.__class__._cache:
-      prev = self._read_info()
-      delta = 1
-      time.sleep(delta)
-    else:
-      prev = self.__class__._cache
-      delta = int(time.time() - self.__class__._lastrefresh)
+        if not os.path.exists(script):
+            return {}
 
-    self.__class__._cache = cur = self._read_info()
+        data = self.gendict()
+        with open(script, 'r') as f:
+            for line in f:
+                fields = line.split()
+                proto = fields[0].lower().rstrip(':')
 
-    for proto in cur.keys():
-      data.setdefault(proto, {})
-      for stat in cur[proto].keys():
-        data[proto][stat] = self.rateof(prev[proto][stat],
-                                        cur[proto][stat], delta)
+                if not proto in data.keys():
+                    keys = [fld.lower() for fld in fields[1:]]
+                    data[proto] = {}
+                else:
+                    data[proto] = dict(zip(keys, tuple(fields[1:])))
 
-    return data
+        return data
 
-  def _read_info(self):
-    data = self.gendict()
-    with open('/proc/net/snmp', 'r') as f:
-      for line in f:
-        fields = line.split()
-        proto = fields[0].lower().rstrip(':')
+    def format_data(self, data):
+        result = {}
+        prev = self.prev_data
 
-        if not proto in data.keys():
-          keys = [fld.lower() for fld in fields[1:]]
-          data[proto] = {}
-        else:
-          data[proto] = dict(zip(keys, tuple(fields[1:])))
+        for proto in data.iterkeys():
+            result.setdefault(proto, {})
+            for stat in data[proto].iterkeys():
+                result[proto][stat] = self.rateof(prev[proto][stat],
+                                                  data[proto][stat])
 
-    return data
+        return result

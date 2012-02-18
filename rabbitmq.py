@@ -32,22 +32,28 @@ class RabbitmqCli(object):
     """Parse rabbitmqctl for output"""
 
     def get_vhosts(self):
-        return Popen(
+        proc = Popen(
           "/usr/sbin/rabbitmqctl list_vhosts",
           stdout=PIPE,
           shell=True
-        ).communicate()[0]\
-         .strip()\
-         .split('\n')[1:-1]
+        )
+        output = proc.communicate()[0].strip().split('\n')[1:-1]
+
+        if proc.returncode != 0:
+            return None
+
+        return output
 
     def get_queues(self, vhost):
-        raw_queues = Popen(
+        proc = Popen(
           "/usr/sbin/rabbitmqctl list_queues -p %s" % vhost,
           stdout=PIPE,
+          stderr=PIPE,
           shell=True
-        ).communicate()[0]\
-         .strip()\
-         .split('\n')[1:-1]
+        )
+        raw_queues = proc.communicate()[0].strip().split('\n')[1:-1]
+        if proc.returncode != 0:
+            return {}
 
         queues = {}
         for line in raw_queues:
@@ -56,14 +62,17 @@ class RabbitmqCli(object):
             except:
                 pass
             else:
-              queues[queue] = int(size)
+                queues[queue] = int(size)
 
         return queues
 
     def get_data(self):
         output = {}
+        vhosts = self.get_vhosts()
+        if not vhosts:
+            return {}
 
-        for vhost in self.get_vhosts():
+        for vhost in vhosts:
             queues = self.get_queues(vhost)
             if vhost == '/':
                 vhost = 'default'
@@ -93,7 +102,7 @@ class RabbitmqWeb(object):
         r.raise_for_status()
 
     def construct_url(self):
-        return "http://%s:%s/api" %(self.host, self.port)
+        return "http://%s:%s/api" % (self.host, self.port)
 
     def get_vhosts(self):
         vhosts_url = "%s/vhosts/" % self.url
@@ -103,7 +112,7 @@ class RabbitmqWeb(object):
         return results
 
     def get_queues(self, vhost):
-        queue_url = "%s/queues/%s" %(self.url, vhost)
+        queue_url = "%s/queues/%s" % (self.url, vhost)
         response = requests.get(queue_url, auth=(self.user, self.passwd))
         queues = json.loads(response.content)
         results = dict([(item['name'], item['messages']) for item in queues])
