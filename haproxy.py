@@ -42,15 +42,15 @@ class HAProxy(object):
 
             ready = select.select([sock], [], [], 3)
             if ready[0]:
-            while True:
-                data = sock.recv(1024)
-                if not data:
-                    break
-                sock_data.append(data)
-
-            sock.close()
+                while True:
+                    data = sock.recv(1024)
+                    if not data:
+                        break
+                        sock_data.append(data)
         except socket.error:
             return []
+
+        sock.close()
 
         return ''.join(sock_data).strip('\n').splitlines()
 
