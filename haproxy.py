@@ -1,4 +1,5 @@
 import re
+import select
 import socket
 
 from porkchop.plugin import PorkchopPlugin
@@ -32,12 +33,15 @@ class HAProxy(object):
     def stats(self, sock_path):
         try:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.setblocking(0)
             sock.connect(sock_path)
             sock_data = []
             data = ''
 
             sock.send('show stat\n')
 
+            ready = select.select([sock], [], [], 3)
+            if ready[0]:
             while True:
                 data = sock.recv(1024)
                 if not data:
