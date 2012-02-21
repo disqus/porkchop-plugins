@@ -239,8 +239,11 @@ class PostgresqlPlugin(PorkchopPlugin):
 
     def _get_table_stats(self, conn):
         query = """
-            SELECT schemaname, relname, COALESCE(seq_tup_read,0) AS seqread,
+            SELECT schemaname, relname,
+            COALESCE(seq_tup_read,0) AS seqread,
+            COALESCE(seq_scan,0) AS seqscan,
             COALESCE(idx_tup_fetch,0) AS idxfetch,
+            COALESCE(idx_scan,0) AS idxscan,
             COALESCE(n_tup_ins,0) AS inserted,
             COALESCE(n_tup_upd,0) AS updated,
             COALESCE(n_tup_del,0) AS deleted,
