@@ -15,7 +15,6 @@ class MemcachedPlugin(PorkchopPlugin):
 
     def get_data(self):
         data = self.gendict()
-        resp_data = ''
 
         instance_config = self.config.get('memcached', {}).get('instances',
             'localhost:11211')
@@ -23,6 +22,7 @@ class MemcachedPlugin(PorkchopPlugin):
         instances = [s.strip().split(':') for s in instance_config.split(',')]
 
         for host, port in instances:
+            resp_data = ''
             try:
                 sock = self._connect(host, int(port))
 
