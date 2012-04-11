@@ -35,7 +35,7 @@ class PCRedisPlugin(PorkchopPlugin):
         claimed = client.zrange('feed.claimed:' + feed, 0, -1)
         stalled = client.smembers('feed.stalled:' + feed)
         return {
-            'backlog': client.llen("feed.ids:test") or 0,
+            'backlog': client.llen('feed.ids:' + feed) or 0,
             'publishes': client.get('feed.publishes:' + feed) or 0,
             'finishes': client.get('feed.finishes:' + feed) or 0,
             'claimed': len(claimed or []),
