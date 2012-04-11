@@ -4,14 +4,6 @@ from porkchop.plugin import PorkchopPlugin
 
 
 class RedisPlugin(PorkchopPlugin):
-    def _connect(self, host, port):
-        try:
-            sock = socket.socket()
-            sock.connect((host, port))
-        except:
-            raise
-
-        return sock
 
     def get_data(self):
         data = self.gendict()
@@ -23,7 +15,7 @@ class RedisPlugin(PorkchopPlugin):
 
         for host, port in instances:
             try:
-                sock = self._connect(host, int(port))
+                sock = self.tcp_socket(host, int(port))
                 sock.send('info\r\n')
 
                 # first line is the response length in bytes
