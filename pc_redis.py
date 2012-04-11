@@ -1,52 +1,57 @@
-import socket
+import redis
 
 from porkchop.plugin import PorkchopPlugin
 
 
-class RedisPlugin(PorkchopPlugin):
+class PCRedisPlugin(PorkchopPlugin):
+
+    __metric_name__ = 'redis'
+
+    def _connect(host, port):
+        return redis.StrictRedis(host, port, 0)
+
+    def _instances(self):
+        instance_config = self.config.get('redis', {}).get('instances',
+                                                           'localhost:6379')
+        return [s.strip().split(':') for s in instance_config.split(',')]
+
+    def _get_info(self, client):
+        return client.info()
+
+    def _get_thoonk(self, client):
+
+        feeds = self.client.smembers('feeds')
+        if not len(feeds):
+            raise Exception("Thoonk doesn't appear to be running.")
+
+        data = {}
+        for feed in feeds:
+            data[feed] = self._thoonk_feed_data(feed, client)
+
+        return data
+
+    def _thoonk_feed_data(self, feed, client):
+        cancelled = client.hvals('feed.cancelled:' + feed)
+        claimed = client.zrange('feed.claimed:' + feed, 0, -1)
+        stalled = client.smembers('feed.stalled:' + feed)
+        return {
+            'backlog': client.llen("feed.ids:test") or 0,
+            'publishes': client.get('feed.publishes:' + feed) or 0,
+            'finishes': client.get('feed.finishes:' + feed) or 0,
+            'claimed': len(claimed or []),
+            'stalled': len(stalled or []),
+            'cancelled_jobs': len(cancelled),
+            'cancelled_count': sum(map(int, cancelled))
+        }
 
     def get_data(self):
-        data = self.gendict()
+        data = {}
 
-        instance_config = self.config.get('redis', {}).get('instances',
-            'localhost:6379')
-
-        instances = [s.strip().split(':') for s in instance_config.split(',')]
-
-        for host, port in instances:
-            try:
-                sock = self.tcp_socket(host, int(port))
-                sock.send('info\r\n')
-
-                # first line is the response length in bytes
-                resp_hdr = ''
-                sock.recv(1)
-                while not resp_hdr.endswith('\r\n'):
-                    resp_hdr += sock.recv(1)
-
-                resp_len = int(resp_hdr.strip())
-
-                resp_data = sock.recv(resp_len)
-                sock.send('quit\r\n')
-                sock.close()
-            except (socket.error, ValueError):
-                continue
-
-            for line in resp_data.splitlines():
-                # apparently some versions of redis have comments and empty lines
-                if not line or line.startswith('#'):
-                    continue
-
-                k, v = line.split(':', 1)
-
-                # some stat values are CSV, k/v delimited with an '='
-                # one of them is allocation_stats but its format is
-                # all fucked up
-                if ',' in v and k != 'allocation_stats':
-                    for stat in v.split(','):
-                        k2, v2 = stat.split('=')
-                        data[port][k][k2] = v2
-                else:
-                    data[port][k] = v
+        for host, port in self._instances():
+            client = self._connect(host, port)
+            cdata = {}
+            cdata = self._get_info(client)
+            cdata['thoonk'] = self._get_thoonk(client)
+            data[port] = cdata
 
         return data
