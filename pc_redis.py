@@ -1,4 +1,5 @@
 import redis
+import socket
 
 from porkchop.plugin import PorkchopPlugin
 
@@ -10,12 +11,13 @@ class RedisPlugin(PorkchopPlugin):
 
     __metric_name__ = 'redis'
 
-    def _connect(host, port):
+    def _connect(self, host, port):
         return redis.StrictRedis(host, port, 0)
 
     def _instances(self):
+        default = "%s:6379" % socket.gethostname()
         instance_config = self.config.get('redis', {}).get('instances',
-                                                           'localhost:6379')
+                                                           default)
         return [s.strip().split(':') for s in instance_config.split(',')]
 
     def _get_info(self, client):
@@ -51,6 +53,7 @@ class RedisPlugin(PorkchopPlugin):
         data = {}
 
         for host, port in self._instances():
+            port = int(port)
             client = self._connect(host, port)
             cdata = {}
             cdata = self._get_info(client)
