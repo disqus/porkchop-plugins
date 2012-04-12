@@ -3,7 +3,10 @@ import redis
 from porkchop.plugin import PorkchopPlugin
 
 
-class PCRedisPlugin(PorkchopPlugin):
+class ThoonkNotRunning(Exception): pass
+
+
+class RedisPlugin(PorkchopPlugin):
 
     __metric_name__ = 'redis'
 
@@ -22,7 +25,7 @@ class PCRedisPlugin(PorkchopPlugin):
 
         feeds = self.client.smembers('feeds')
         if not len(feeds):
-            raise Exception("Thoonk doesn't appear to be running.")
+            raise ThoonkNotRunning
 
         data = {}
         for feed in feeds:
@@ -51,7 +54,10 @@ class PCRedisPlugin(PorkchopPlugin):
             client = self._connect(host, port)
             cdata = {}
             cdata = self._get_info(client)
-            cdata['thoonk'] = self._get_thoonk(client)
+            try:
+                cdata['thoonk'] = self._get_thoonk(client)
+            except ThoonkNotRunning:
+                pass
             data[port] = cdata
 
         return data
