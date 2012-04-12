@@ -25,7 +25,7 @@ class RedisPlugin(PorkchopPlugin):
 
     def _get_thoonk(self, client):
 
-        feeds = self.client.smembers('feeds')
+        feeds = client.smembers('feeds')
         if not len(feeds):
             raise ThoonkNotRunning
 
@@ -53,8 +53,7 @@ class RedisPlugin(PorkchopPlugin):
         data = {}
 
         for host, port in self._instances():
-            port = int(port)
-            client = self._connect(host, port)
+            client = self._connect(host, int(port))
             cdata = {}
             cdata = self._get_info(client)
             try:
