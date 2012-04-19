@@ -259,6 +259,22 @@ class PostgresqlPlugin(PorkchopPlugin):
             row_result = data[row['schemaname']][row['relname']] = {}
             for key in (k for k in row.iterkeys() if k not in ('schemaname', 'relname')):
                 row_result[key] = row[key]
+
+        query = """
+            SELECT relname,
+                   reltuples,
+                   relpages
+            FROM pg_class
+            WHERE reltype != 0
+        """
+
+        # TODO: this doesnt handle namespacing schemas, but we only care about public
+        results = exc(conn, query)
+        for row in results:
+            if row['relname'] not in data['public']:
+                continue
+            for key in (k for k in row.iterkeys() if k not in ('relname')):
+                row_result[key] = row[key]
         return data
 
     def _count_num_dbs(self, conn):
