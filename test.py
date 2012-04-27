@@ -2,8 +2,9 @@ from porkchop.plugin import PorkchopPlugin
 
 
 class TestPlugin(PorkchopPlugin):
+    refresh = 5
+
     def __init__(self, *args, **kwargs):
-        self.refresh = 5
         super(TestPlugin, self).__init__(*args, **kwargs)
 
     def get_data(self):
