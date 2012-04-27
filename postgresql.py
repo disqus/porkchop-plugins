@@ -269,12 +269,15 @@ class PostgresqlPlugin(PorkchopPlugin):
         """
 
         # TODO: this doesnt handle namespacing schemas, but we only care about public
-        results = exc(conn, query)
-        for row in results:
-            if row['relname'] not in data['public']:
-                continue
-            for key in (k for k in row.iterkeys() if k not in ('relname')):
-                row_result[key] = row[key]
+        public_relnames = data.get('public', {}).keys()
+        if public_relnames:
+            results = exc(conn, query)
+            for row in results:
+                if row['relname'] not in public_relnames:
+                    continue
+                row_result = data['public'][row['relname']]
+                for key in (k for k in row.iterkeys() if k not in ('relname')):
+                    row_result[key] = row[key]
         return data
 
     def _count_num_dbs(self, conn):
