@@ -37,14 +37,14 @@ class RedisPlugin(PorkchopPlugin):
 
     def _thoonk_feed_data(self, feed, client):
         cancelled = client.hvals('feed.cancelled:' + feed)
-        claimed = client.zrange('feed.claimed:' + feed, 0, -1)
-        stalled = client.smembers('feed.stalled:' + feed)
+        claimed_cnt = client.zcard('feed.claimed:' + feed)
+        stalled_cnt = client.scard('feed.stalled:' + feed)
         return {
             'backlog': client.llen('feed.ids:' + feed) or 0,
             'publishes': client.get('feed.publishes:' + feed) or 0,
             'finishes': client.get('feed.finishes:' + feed) or 0,
-            'claimed': len(claimed or []),
-            'stalled': len(stalled or []),
+            'claimed': claimed_cnt,
+            'stalled': stalled_cnt,
             'cancelled_jobs': len(cancelled),
             'cancelled_count': sum(map(int, cancelled))
         }
