@@ -46,7 +46,7 @@ class HAProxy(object):
                     data = sock.recv(1024)
                     if not data:
                         break
-                        sock_data.append(data)
+                    sock_data.append(data)
         except socket.error:
             return []
 

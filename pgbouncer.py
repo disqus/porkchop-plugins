@@ -77,28 +77,10 @@ class PgbouncerPlugin(PorkchopPlugin):
             for col in [key for key in row.keys() if key != 'database']:
                 data[row['database']][col] = row[col]
 
-        res = exc(conn, 'show servers')
-        for x in xrange(len(res)):
-            for col in [key for key in res[x].keys()]:
-                data['server%d' % x][col] = res[x][col]
-
-        res = exc(conn, 'show clients')
-        for x in xrange(len(res)):
-            for col in [key for key in res[x].keys()]:
-                data['client%d' % x][col] = res[x][col]
-
         for row in exc(conn, 'show pools'):
             for col in [key for key in row.keys() if key != 'database']:
                 data[row['database']][col] = row[col]
 
         data['lists'] = exc(conn, 'show lists', 'list', 'items')
-
-        for row in exc(conn, 'show databases'):
-            for col in [key for key in row.keys() if key != 'name']:
-                data[row['database']][col] = row[col]
-
-        for row in exc(conn, 'show fds'):
-            for col in [key for key in row.keys() if key != 'fd']:
-                data['fd%d' % row['fd']][col] = row[col]
 
         return data
