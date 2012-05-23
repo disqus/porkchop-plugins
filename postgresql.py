@@ -170,7 +170,7 @@ class PostgresqlPlugin(PorkchopPlugin):
         # change tuple_stats to be rateof
         for db, db_data in data['tuple_access'].iteritems():
             for key, value in db_data.iteritems():
-                prev_value = self.prev_data['tuple_stats'][db][key] or 0
+                prev_value = self.prev_data['tuple_access'][db][key] or 0
                 result['tuple_access'][db][key] = fmt(self.rateof(prev_value, value))
 
         # change table_stats to be rateof
