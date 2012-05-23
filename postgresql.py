@@ -178,6 +178,8 @@ class PostgresqlPlugin(PorkchopPlugin):
             for schema_name, schema_data in db_data.iteritems():
                 for table_name, table_data in schema_data.iteritems():
                     for key, value in table_data.iteritems():
+                        if key in ('reltuples', 'relpages'):
+                            continue
                         prev_value = self.prev_data['table_stats'][db][schema_name][table_name][key] or 0
                         result['table_stats'][db][schema_name][table_name][key] = fmt(self.rateof(prev_value, value))
         return result
