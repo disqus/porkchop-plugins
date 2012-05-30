@@ -16,11 +16,11 @@ class PostfixStatsPlugin(PorkchopPlugin):
 
         s = socket.socket()
 
+        json_data = ''
         try:
             s.connect((host, int(port)))
             s.sendall('stats\n')
 
-            json_data = ''
             while 1:
                 raw_data = s.recv(1024)
                 if not raw_data:
