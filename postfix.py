@@ -30,7 +30,7 @@ class PostfixPlugin(PorkchopPlugin):
             fields = line.split()
 
             domain_metrics = {}
-            for i, metric in enumerate(fields[1:]):
+            for i, metric in enumerate(fields[2:]):
                 domain_metrics[intervals[i]] = metric
 
             # fields[0] == domain
