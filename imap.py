@@ -18,7 +18,7 @@ class ImapPlugin(PorkchopPlugin):
     
         try:
             M = imaplib.IMAP4(imap_host, imap_port)
-            M.login(imap_login, imap_password)
+            M.login(imap_user, imap_password)
         except (socket.error, imaplib.IMAP4.error):
             return {}
 
