@@ -22,12 +22,14 @@ class PostfixPlugin(PorkchopPlugin):
         output = Popen([cmd], stdout=PIPE, shell=True).communicate()[0].splitlines()
 
         # Use headers as keys just in case change to linear output
-        intervals = [''.join([intv, 'm']) for intv in output[0].split()]
-        # Drop Total
-        intervals.pop(0)
+        intervals = [''.join([intv, 'm']) for intv in output[0].split() if intv != 'T']
 
-        for line in output[2:]:
+        for line in output[1:]:
             fields = line.split()
+
+            if fields[0].lower() == 'total':
+                data['total'] = fields[1]
+                continue
 
             domain_metrics = {}
             for i, metric in enumerate(fields[2:]):
@@ -55,6 +57,9 @@ class PostfixPlugin(PorkchopPlugin):
 
                 if domain in top_domains:
                      data['domains'].setdefault(domain, {}).update({queue: stats})
+
+                if domain.lower() == 'total':
+                     data['global'][queue] = stats
 
         data['all_domains'] = flatten(all_domains, ";:|?,=")
 
