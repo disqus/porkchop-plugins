@@ -24,6 +24,10 @@ class CivetPlugin(PorkchopPlugin):
         finally:
             s.close()
 
-        data = json.loads(json_data)
+        raw_data = json.loads(json_data)
+
+        data = self.gendict('dot')
+        for k, v in a.iteritems():
+            data[k] = v
 
         return data
