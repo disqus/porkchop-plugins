@@ -1,21 +1,14 @@
 from collections import defaultdict
 from subprocess import Popen, PIPE
+
 from porkchop.plugin import PorkchopPlugin
 
-class dotDict(defaultdict):
-    def __init__(self):
-        defaultdict.__init__(self, dotDict)
-    def __setitem__(self, key, value):
-        keys = key.split('.')
-        for key in keys[:-1]:
-            self = self[key]
-        defaultdict.__setitem__(self, keys[-1], value)
 
 class UnboundPlugin(PorkchopPlugin):
     def get_data(self):
         raw_stats = Popen("/usr/sbin/unbound-control stats", stdout=PIPE, shell=True).communicate()[0].splitlines()
 
-        stats = dotDict()
+        stats = self.gendict('dot')
 
         raw_histogram = {}
 
