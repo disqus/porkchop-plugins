@@ -33,24 +33,24 @@ class PIDFileFilter(Filter):
         return isinstance(filter_string, basestring) and os.access(filter_string, os.R_OK)
 
     def _filter(self, on):
-        return str(self.pid) == on.split(os.sep)[2]
+        return on.split(os.sep)[2] in self.pids
 
     @property
-    def pid(self):
+    def pids(self):
         try:
             st_mtime = os.stat(self.filter).st_mtime
         except OSError:
-            return None
+            return []
 
-        if st_mtime > self.last_mtime:
+        if st_mtime > self._last_mtime:
             try:
                 with open(self.filter) as fp:
-                    self._pid = int(fp.read().strip())
-                    self.last_mtime = st_mtime
+                    self._pids = fp.readlines()
+                    self._last_mtime = st_mtime
             except IOError:
-                return None
+                return []
 
-        return self._pid
+        return self._pids
 
 
 class EXEFilter(Filter):
