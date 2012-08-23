@@ -7,7 +7,7 @@ from time import sleep
 
 from porkchop.plugin import PorkchopPlugin
 
-__all__ = ['CPUByProcess']
+__all__ = ['CPUByProcessPlugin']
 
 _CLOCK_RATE = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
 _NUM_CPUS = os.sysconf('SC_NPROCESSORS_ONLN')
@@ -15,7 +15,7 @@ _NUM_CPUS = os.sysconf('SC_NPROCESSORS_ONLN')
 
 class Filter(object):
     """Base Filter
-    
+
     All Filters need to implement at least:
         _filter
         is_compatible
@@ -83,7 +83,7 @@ class EXEFilter(Filter):
     """/proc/<pid>/exe filter
 
     This uses fnmatch to check if the filter_string matches the exe
-    
+
     haproxy=exe:/usr/local/bin/haproxy"""
     @staticmethod
     def is_compatible(filter_string):
@@ -100,7 +100,7 @@ class CMDLineFilter(Filter):
     """/proc/<pid>/cmdline filter
 
     Provide a regex to match on the cmdline on
-    
+
     haproxy_misc=cmdline:/usr/local/bin/haproxy.*-f /etc/haproxy/haproxy_misc.cfg.*"""
     def __init__(self, filter):
         super(CMDLineFilter, self).__init__(filter)
@@ -179,7 +179,7 @@ class CPUByProcessPlugin(PorkchopPlugin):
     @property
     def filters(self):
         """Instantiate filters from config file
-        
+
         [cpubyprocess]
         filter_name=<filter_type>:<filter_string>
         """
@@ -222,7 +222,7 @@ class CPUByProcessPlugin(PorkchopPlugin):
                     # If the PID changed the delta will most likely be negative
                     # So delete the proc from the cache and re-calculate
                     if delta_proc < 0.0:
-                        del cls.__cache[proc]
+                        del self.__cache[proc]
                         delta_proc, delta_sys = self.calc_deltas(proc)
 
                     try:
