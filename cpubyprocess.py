@@ -19,6 +19,7 @@ class Filter(object):
     All Filters need to implement at least:
         _filter
         is_compatible
+
     """
     def __init__(self, filter):
         self.filter = filter
@@ -33,23 +34,25 @@ class Filter(object):
 
     @staticmethod
     def is_compatible(filter_string):
-        """Is the defined filter_string compatible with the filter"""
+        """Is the defined filter_string compatible with the filter?"""
         raise NotImplementedError()
 
 
 class PIDFileFilter(Filter):
     """PID file Filter
 
-    Given a PID file, match on the PID(s) it contains
+    Given a PID file, match on the PID(s) it contains.
 
-    haproxy=pidfile:/var/run/haproxy.pid"""
+    haproxy=pidfile:/var/run/haproxy.pid
+
+    """
     def __init__(self, *args, **kwargs):
         self._last_mtime = 0
         return super(PIDFileFilter, self).__init__(*args, **kwargs)
 
     @staticmethod
     def is_compatible(filter_string):
-        """Has to be a string and is the path to a readable file"""
+        """Is it a basestring and the path to a readable file?"""
         return isinstance(filter_string, basestring) and os.access(filter_string, os.R_OK)
 
     def _filter(self, on):
@@ -57,10 +60,12 @@ class PIDFileFilter(Filter):
 
     @property
     def pids(self):
-        """Cache the pids from the pid file based
-            on the modified time of the file
+        """Cache the pids from the pid file based on the
+        modified time of the file.
 
-        It expects up to 1 pid per line"""
+        It expects up to 1 pid per line.
+
+        """
         try:
             st_mtime = os.stat(self.filter).st_mtime
         except OSError:
@@ -82,9 +87,11 @@ class PIDFileFilter(Filter):
 class EXEFilter(Filter):
     """/proc/<pid>/exe filter
 
-    This uses fnmatch to check if the filter_string matches the exe
+    This uses fnmatch to check if the filter_string matches the exe.
 
-    haproxy=exe:/usr/local/bin/haproxy"""
+    haproxy=exe:/usr/local/bin/haproxy
+
+    """
     @staticmethod
     def is_compatible(filter_string):
         return isinstance(filter_string, basestring)
@@ -99,9 +106,11 @@ class EXEFilter(Filter):
 class CMDLineFilter(Filter):
     """/proc/<pid>/cmdline filter
 
-    Provide a regex to match on the cmdline on
+    Provide a regex to match on the cmdline on.
 
-    haproxy_misc=cmdline:/usr/local/bin/haproxy.*-f /etc/haproxy/haproxy_misc.cfg.*"""
+    haproxy_misc=cmdline:/usr/local/bin/haproxy.*-f /etc/haproxy/haproxy_misc.cfg.*
+
+    """
     def __init__(self, filter):
         super(CMDLineFilter, self).__init__(filter)
 
@@ -126,7 +135,7 @@ class CMDLineFilter(Filter):
 
 
 def get_proc_cputime(pid):
-    """Turn proc jiffies into time"""
+    """Sum proc user jiffies and system jiffies and return total time."""
     with open('/proc/%s/stat' % pid) as proc_stat:
         stat = proc_stat.read().strip()
 
@@ -139,7 +148,7 @@ def get_proc_cputime(pid):
 
 
 def get_system_cputime():
-    """Get total cputime"""
+    """Retrun total system cputime."""
     with open('/proc/stat') as proc_stat:
         stats = proc_stat.read().split()
 
@@ -157,9 +166,12 @@ class CPUByProcessPlugin(PorkchopPlugin):
 
     @classmethod
     def calc_deltas(cls, proc):
-        """Calculate deltas of proc and sys cputime from previous run
+        """Calculate deltas of proc and sys cputime from previous run.
 
-        If this is the first run, cache and sleep 100ms"""
+        If this is the first run, get times and cache, then sleep 100ms
+        before calculating the delta.
+
+        """
         if proc not in cls.__cache:
             cls.__cache[proc]['proc'] = get_proc_cputime(proc)
             cls.__cache[proc]['sys'] = get_system_cputime()
@@ -178,10 +190,11 @@ class CPUByProcessPlugin(PorkchopPlugin):
 
     @property
     def filters(self):
-        """Instantiate filters from config file
+        """Instantiate filters from config file.
 
         [cpubyprocess]
         filter_name=<filter_type>:<filter_string>
+
         """
         filters = {}
         for process, mask in self.config.get('cpubyprocess', {}).iteritems():
@@ -200,9 +213,11 @@ class CPUByProcessPlugin(PorkchopPlugin):
 
     def get_data(self):
         """Crawl /proc for any processes that match a filter and
-            generate the data dict
+            generate the data dict.
 
-        If no filters are defined, return empty data immediately"""
+        If no filters are defined, return empty data immediately.
+
+        """
         data = defaultdict(float)
 
         filters = self.filters
