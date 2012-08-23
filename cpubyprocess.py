@@ -47,8 +47,9 @@ class PIDFileFilter(Filter):
 
     """
     def __init__(self, *args, **kwargs):
+        super(PIDFileFilter, self).__init__(*args, **kwargs)
+
         self._last_mtime = 0
-        return super(PIDFileFilter, self).__init__(*args, **kwargs)
 
     @staticmethod
     def is_compatible(filter_string):
