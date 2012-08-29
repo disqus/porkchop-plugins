@@ -31,7 +31,7 @@ def df(cmd):
 class DfPlugin(PorkchopPlugin):
     def get_data(self):
         data = {}
-        cmd = 'df -l'
+        cmd = 'df -Pl'
         excludefs = [
           'debugfs',
           'devtmpfs',
