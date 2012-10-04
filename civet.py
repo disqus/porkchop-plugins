@@ -10,8 +10,9 @@ class CivetPlugin(PorkchopPlugin):
         host, port = instance_config.split(':')
 
         json_data = ''
+        s = socket.create_connection((host, int(port)), timeout=1)
+
         try:
-            s = socket.create_connection((host, int(port)), timeout=1)
             s.sendall('sample\n')
 
             while 1:
