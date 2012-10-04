@@ -251,7 +251,6 @@ class PostgresqlPlugin(PorkchopPlugin):
             COALESCE(n_tup_del,0) AS deleted,
             COALESCE(n_tup_hot_upd,0) AS hotupdated
             FROM pg_stat_user_tables
-            WHERE schemaname = 'public'
         """
 
         data = {}
