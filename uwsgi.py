@@ -37,7 +37,7 @@ class UwsgiPlugin(PorkchopPlugin):
             except ValueError:
                 continue
 
-            inst_data = data[instance]
+            inst_data = data[name]
             inst_data['workers'] = defaultdict(dict)
 
             inst_data['listen_queue'] = raw_data['listen_queue']
