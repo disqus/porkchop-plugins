@@ -56,7 +56,7 @@ class UwsgiPlugin(PorkchopPlugin):
                 worker_data.update(worker)
 
                 for app in apps:
-                    mountpoint = app.pop('mountpoint', 'ROOT')
+                    mountpoint = app.pop('mountpoint', None) or 'ROOT'
 
                     del app['id']
                     del app['chdir']
