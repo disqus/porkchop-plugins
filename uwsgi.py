@@ -38,14 +38,15 @@ class UwsgiPlugin(PorkchopPlugin):
                 continue
 
             inst_data = data[name]
-            inst_data['workers'] = defaultdict(dict)
+            inst_data['workers'] = {}
 
             inst_data['listen_queue'] = raw_data['listen_queue']
             inst_data['listen_queue_errors'] = raw_data['listen_queue_errors']
             inst_data['load'] = raw_data['load']
 
             for worker in raw_data['workers']:
-                worker_data = inst_data['workers'][worker.pop('id')]
+                worker_data = inst_data['workers'][str(worker.pop('id'))] = {}
+                worker_data['apps'] = defaultdict(dict)
 
                 del worker['pid']
                 del worker['status']
@@ -55,7 +56,7 @@ class UwsgiPlugin(PorkchopPlugin):
                 worker_data.update(worker)
 
                 for app in apps:
-                    mountpoint = app.pop('mountpoint', 'root')
+                    mountpoint = app.pop('mountpoint', 'ROOT')
 
                     del app['id']
                     del app['chdir']
