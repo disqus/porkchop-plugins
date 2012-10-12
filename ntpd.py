@@ -5,7 +5,7 @@ from porkchop.plugin import PorkchopPlugin
 
 class NtpdPlugin(PorkchopPlugin):
     @staticmethod
-    def ntpq_data(self):
+    def ntpq_data():
         data = {}
 
         cmd = ['/usr/bin/ntpq', '-np']
@@ -29,7 +29,7 @@ class NtpdPlugin(PorkchopPlugin):
         return data
 
     @staticmethod
-    def ntpdc_data(self):
+    def ntpdc_data():
         data = {}
 
         cmd = ['/usr/bin/ntpdc', '-c', 'kerninfo']
