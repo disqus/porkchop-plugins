@@ -9,7 +9,7 @@ class NtpdPlugin(PorkchopPlugin):
         data = {}
 
         cmd = ['/usr/bin/ntpq', '-np']
-        output = Popen(cmd, stdout=PIPE, shell=True).communicate()[0].splitlines()
+        output = Popen(cmd, stdout=PIPE).communicate()[0].splitlines()
 
         for line in output:
             # Only care about system peer
@@ -33,7 +33,7 @@ class NtpdPlugin(PorkchopPlugin):
         data = {}
 
         cmd = ['/usr/bin/ntpdc', '-c', 'kerninfo']
-        output = Popen(cmd, stdout=PIPE, shell=True).communicate()[0].splitlines()
+        output = Popen(cmd, stdout=PIPE).communicate()[0].splitlines()
 
         for line in output:
             key, val = line.split(':')
