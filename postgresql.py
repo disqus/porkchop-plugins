@@ -164,26 +164,6 @@ class PostgresqlPlugin(PorkchopPlugin):
 
         return data
 
-    def format_data(self, data):
-        result = copy.deepcopy(data)
-
-        # change tuple_stats to be rateof
-        for db, db_data in data['tuple_access'].iteritems():
-            for key, value in db_data.iteritems():
-                prev_value = self.prev_data['tuple_access'][db][key] or 0
-                result['tuple_access'][db][key] = fmt(self.rateof(prev_value, value))
-
-        # change table_stats to be rateof
-        for db, db_data in data['table_stats'].iteritems():
-            for schema_name, schema_data in db_data.iteritems():
-                for table_name, table_data in schema_data.iteritems():
-                    for key, value in table_data.iteritems():
-                        if key in ('reltuples', 'relpages'):
-                            continue
-                        prev_value = self.prev_data['table_stats'][db][schema_name][table_name][key] or 0
-                        result['table_stats'][db][schema_name][table_name][key] = fmt(self.rateof(prev_value, value))
-        return result
-
     def _get_bgwriter_data(self, conn):
         try:
             row = exc(conn, 'SELECT * from pg_stat_bgwriter')[0]
