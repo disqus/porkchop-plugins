@@ -26,20 +26,20 @@ def exc(conn, query, col_key=None, col_val=None):
 
 class PostgresqlPlugin(PorkchopPlugin):
     def _connect(self, dbname=None):
-        dbname = dbname if dbname else 'postgres'
+        config = self.config.get('postgresql', {})
+        if dbname:
+            config['dbname'] = dbname
+        else:
+            config.setdefault('dbname', 'postgres')
+        conn_string = ' '.join("%s='%s'" % (k, v) for k, v in config.iteritems())
+
         try:
-            conn_string = "host='%s' dbname='%s' user='%s' password='%s'" % (
-                self.config['postgresql']['host'],
-                dbname,
-                self.config['postgresql']['user'],
-                self.config['postgresql']['password'],
-            )
             conn = psycopg2.connect(conn_string)
             conn.set_isolation_level(0)  # don't need transactions
         except Exception, e:
             self.log_error('Unable to connect to database %s on %s: %s' % (
                 dbname,
-                self.config['postgresql']['host'],
+                self.config.get('host', 'localhost'),
                 e,
             ))
             return None
