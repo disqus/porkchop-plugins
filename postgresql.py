@@ -230,7 +230,7 @@ class PostgresqlPlugin(PorkchopPlugin):
             COALESCE(n_tup_upd,0) AS updated,
             COALESCE(n_tup_del,0) AS deleted,
             COALESCE(n_tup_hot_upd,0) AS hotupdated
-            FROM pg_stat_user_tables
+            FROM pg_stat_all_tables
         """
 
         data = {}
@@ -242,23 +242,27 @@ class PostgresqlPlugin(PorkchopPlugin):
                 row_result[key] = row[key]
 
         query = """
-            SELECT relname,
-                   reltuples,
-                   relpages
+            SELECT pg_class.relname,
+                   pg_namespace.nspname as schemaname,
+                   pg_relation_size(pg_class.oid) as relsize
             FROM pg_class
+            INNER JOIN
+              pg_namespace
+            ON pg_namespace.oid = pg_class.relnamespace
             WHERE reltype != 0
         """
 
-        # TODO: this doesnt handle namespacing schemas, but we only care about public
-        public_relnames = data.get('public', {}).keys()
-        if public_relnames:
-            results = exc(conn, query)
-            for row in results:
-                if row['relname'] not in public_relnames:
-                    continue
-                row_result = data['public'][row['relname']]
-                for key in (k for k in row.iterkeys() if k not in ('relname')):
-                    row_result[key] = row[key]
+        results = exc(conn, query)
+        for row in results:
+            relname = row['relname']
+            schemaname = row['schemaname']
+            if schemaname not in data or relname not in data[schemaname]:
+                continue
+
+            row_result = data[schemaname][relname]
+            for key in (k for k in row.iterkeys() if k not in ('schemaname', 'relname')):
+                row_result[key] = row[key]
+
         return data
 
     def _count_num_dbs(self, conn):
