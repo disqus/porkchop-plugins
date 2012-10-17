@@ -224,42 +224,75 @@ class PostgresqlPlugin(PorkchopPlugin):
         reserved = ('schemaname', 'relname')
         data = defaultdict(lambda: defaultdict(dict))
 
+        def collect_from_query(query):
+            results = exc(conn, query)
+            for row in results:
+                relname, schemaname = row['relname'], row['schemaname']
+                row_result = data[schemaname][relname]
+                for key in row.iterkeys():
+                    if key in reserved:
+                        continue
+
+                    # these are timestamp types (in one query, at least)
+                    if key.startswith('last_'):
+                        continue
+
+                    row_result[key] = row[key] or 0
+
         # collect query statistics for all relations
         query = """
-            SELECT *
+            SELECT relname,
+                   schemaname,
+                   seq_scan,
+                   seq_tup_read,
+                   idx_scan,
+                   idx_tup_fetch,
+                   n_tup_ins,
+                   n_tup_upd,
+                   n_tup_del,
+                   n_tup_hot_upd,
+                   n_live_tup,
+                   n_dead_tup
             FROM pg_stat_all_tables
         """
-
-        results = exc(conn, query)
-        for row in results:
-            relname, schemaname = row['relname'], row['schemaname']
-            row_result = data[schemaname][relname]
-            for key in row.iterkeys():
-                if key in reserved:
-                    continue
-
-                # these are timestamp types
-                if key.startswith('last_'):
-                    continue
-
-                row_result[key] = row[key] or 0
+        collect_from_query(query)
 
         # collect io statistics for all relations
         query = """
-            SELECT *
+            SELECT relname,
+                   schemaname,
+                   heap_blks_read,
+                   heap_blks_hit,
+                   idx_blks_read,
+                   idx_blks_hit,
+                   toast_blks_read,
+                   toast_blks_hit,
+                   tidx_blks_read,
+                   tidx_blks_hit
             FROM pg_statio_all_tables
         """
+        collect_from_query(query)
 
-        data = {}
-        results = exc(conn, query)
-        for row in results:
-            relname, schemaname = row['relname'], row['schemaname']
-            row_result = data[schemaname][relname]
-            for key in row.iterkeys():
-                if key in reserved:
-                    continue
+       # collect query statistics for all indexes
+        query = """
+            SELECT relname,
+                   schemaname,
+                   idx_scan,
+                   idx_tup_read,
+                   idx_tup_fetch
+            FROM pg_stat_all_indexes
+        """
+        collect_from_query(query)
 
-                row_result[key] = row[key] or 0
+        # collect io statistics for all indexes
+        query = """
+            SELECT relname,
+                   schemaname,
+                   idx_blks_read,
+                   idx_blks_hit
+            FROM pg_statio_all_indexes
+        """
+        collect_from_query(query)
 
         # collection size (on disk) for all relations
         query = """
@@ -272,17 +305,7 @@ class PostgresqlPlugin(PorkchopPlugin):
             ON pg_namespace.oid = pg_class.relnamespace
             WHERE reltype != 0
         """
-
-        results = exc(conn, query)
-        for row in results:
-            relname, schemaname = row['relname'], row['schemaname']
-            row_result = data[schemaname][relname]
-
-            for key in row.iterkeys():
-                if key in reserved:
-                    continue
-
-                row_result[key] = row[key] or 0
+        collect_from_query(query)
 
         return data
 
