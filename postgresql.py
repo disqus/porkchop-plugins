@@ -221,14 +221,14 @@ class PostgresqlPlugin(PorkchopPlugin):
         return [d[0] for d in results]
 
     def _get_table_stats(self, conn):
+        reserved = ('schemaname', 'relname')
+        data = defaultdict(lambda: defaultdict(dict))
+
+        # collect query statistics for all relations
         query = """
             SELECT *
             FROM pg_stat_all_tables
         """
-
-        reserved = ('schemaname', 'relname')
-
-        data = defaultdict(lambda: defaultdict(dict))
 
         results = exc(conn, query)
         for row in results:
@@ -244,9 +244,10 @@ class PostgresqlPlugin(PorkchopPlugin):
 
                 row_result[key] = row[key] or 0
 
+        # collect io statistics for all relations
         query = """
             SELECT *
-            FROM pg_stat_all_tables
+            FROM pg_statio_all_tables
         """
 
         data = {}
@@ -260,6 +261,7 @@ class PostgresqlPlugin(PorkchopPlugin):
 
                 row_result[key] = row[key] or 0
 
+        # collection size (on disk) for all relations
         query = """
             SELECT pg_class.relname,
                    pg_namespace.nspname as schemaname,
