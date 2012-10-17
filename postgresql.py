@@ -2,6 +2,7 @@ import copy
 import psycopg2
 import psycopg2.extras
 
+from collections import defaultdict
 from porkchop.plugin import PorkchopPlugin
 
 
@@ -221,25 +222,43 @@ class PostgresqlPlugin(PorkchopPlugin):
 
     def _get_table_stats(self, conn):
         query = """
-            SELECT schemaname, relname,
-            COALESCE(seq_tup_read,0) AS seqread,
-            COALESCE(seq_scan,0) AS seqscan,
-            COALESCE(idx_tup_fetch,0) AS idxfetch,
-            COALESCE(idx_scan,0) AS idxscan,
-            COALESCE(n_tup_ins,0) AS inserted,
-            COALESCE(n_tup_upd,0) AS updated,
-            COALESCE(n_tup_del,0) AS deleted,
-            COALESCE(n_tup_hot_upd,0) AS hotupdated
+            SELECT *
+            FROM pg_stat_all_tables
+        """
+
+        reserved = ('schemaname', 'relname')
+
+        data = defaultdict(lambda: defaultdict(dict))
+
+        results = exc(conn, query)
+        for row in results:
+            relname, schemaname = row['relname'], row['schemaname']
+            row_result = data[schemaname][relname]
+            for key in row.iterkeys():
+                if key in reserved:
+                    continue
+
+                # these are timestamp types
+                if key.startswith('last_'):
+                    continue
+
+                row_result[key] = row[key] or 0
+
+        query = """
+            SELECT *
             FROM pg_stat_all_tables
         """
 
         data = {}
         results = exc(conn, query)
         for row in results:
-            data.setdefault(row['schemaname'], {})
-            row_result = data[row['schemaname']][row['relname']] = {}
-            for key in (k for k in row.iterkeys() if k not in ('schemaname', 'relname')):
-                row_result[key] = row[key]
+            relname, schemaname = row['relname'], row['schemaname']
+            row_result = data[schemaname][relname]
+            for key in row.iterkeys():
+                if key in reserved:
+                    continue
+
+                row_result[key] = row[key] or 0
 
         query = """
             SELECT pg_class.relname,
@@ -254,14 +273,14 @@ class PostgresqlPlugin(PorkchopPlugin):
 
         results = exc(conn, query)
         for row in results:
-            relname = row['relname']
-            schemaname = row['schemaname']
-            if schemaname not in data or relname not in data[schemaname]:
-                continue
-
+            relname, schemaname = row['relname'], row['schemaname']
             row_result = data[schemaname][relname]
-            for key in (k for k in row.iterkeys() if k not in ('schemaname', 'relname')):
-                row_result[key] = row[key]
+
+            for key in row.iterkeys():
+                if key in reserved:
+                    continue
+
+                row_result[key] = row[key] or 0
 
         return data
 
