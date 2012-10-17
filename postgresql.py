@@ -233,10 +233,6 @@ class PostgresqlPlugin(PorkchopPlugin):
                     if key in reserved:
                         continue
 
-                    # these are timestamp types (in one query, at least)
-                    if key.startswith('last_'):
-                        continue
-
                     row_result[key] = row[key] or 0
 
         # collect query statistics for all relations
