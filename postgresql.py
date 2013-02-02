@@ -26,12 +26,22 @@ def exc(conn, query, col_key=None, col_val=None):
 
 class PostgresqlPlugin(PorkchopPlugin):
     def _connect(self, dbname=None):
+        # From http://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+        LIBPQ_PARAMS = (
+            'host', 'hostaddr', 'port', 'dbname', 'user', 'password',
+            'connect_timeout', 'client_encoding', 'options', 'application_name',
+            'fallback_application_name', 'keepalives', 'keepalives_idle',
+            'keepalives_interval', 'keepalives_count', 'tty', 'sslmode',
+            'requiressl', 'sslcompression', 'sslcert', 'sslkey', 'sslrootcert',
+            'sslcrl', 'requirepeer', 'krbsrvname', 'gsslib', 'service',
+        )
+
         config = self.config.get('postgresql', {})
         if dbname:
             config['dbname'] = dbname
         else:
             config.setdefault('dbname', 'postgres')
-        conn_string = ' '.join("%s='%s'" % (k, v) for k, v in config.iteritems())
+        conn_string = ' '.join("%s='%s'" % (k, v) for k, v in config.iteritems() if k not in LIBPQ_PARAMS)
 
         try:
             conn = psycopg2.connect(conn_string)
